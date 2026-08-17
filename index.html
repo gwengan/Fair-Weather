@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fair Weather</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;1,8..60,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#1a1814;--ink-mid:#4a4540;--ink-light:#8a847a;
+  --paper:#faf8f4;--paper-warm:#f3efe8;--paper-mid:#e8e2d8;
+  --accent:#7c3d2a;--accent-light:#c4855a;--accent-pale:#f2e8e0;
+  --teal:#2a6b6a;--teal-light:#e0f0ef;
+  --success:#3a7a3a;--success-bg:#e8f4e8;
+  --gold:#b8860b;--gold-light:#fdf3dc;
+  --r:6px;--rl:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Source Serif 4',Georgia,serif;background:var(--paper);color:var(--ink);font-size:17px;line-height:1.8;min-height:100vh;}
+#screen-cover,#screen-main,#screen-summary{display:none;}
+#screen-cover.active,#screen-main.active,#screen-summary.active{display:block;}
+/* COVER */
+#screen-cover{min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:3rem 2rem;text-align:center;background:var(--ink);}
+#screen-cover.active{display:flex;}
+.cover-wave{width:100%;max-width:480px;height:3px;background:linear-gradient(90deg,transparent,var(--accent-light),var(--teal),var(--accent-light),transparent);margin:1.5rem auto;opacity:0.6;}
+.cover-eyebrow{font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--accent-light);opacity:0.85;margin-bottom:0.4rem;}
+.cover-title{font-family:'Playfair Display',Georgia,serif;font-size:clamp(2.8rem,8vw,5rem);color:var(--paper);line-height:1.1;letter-spacing:-0.02em;font-weight:600;}
+.cover-subtitle{font-family:'Source Serif 4',serif;font-style:italic;font-size:1.1rem;color:var(--ink-light);margin-top:0.5rem;}
+.cover-tagline{color:var(--paper-mid);font-size:0.95rem;max-width:400px;line-height:1.7;margin-top:2rem;font-style:italic;}
+.cover-btn{margin-top:3rem;padding:0.9rem 2.5rem;background:var(--accent);color:var(--paper);border:none;border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.85rem;letter-spacing:0.08em;cursor:pointer;text-transform:uppercase;transition:background 0.2s,transform 0.15s;}
+.cover-btn:hover{background:var(--accent-light);transform:translateY(-1px);}
+.cover-note{margin-top:1.5rem;font-size:0.8rem;color:var(--ink-light);font-family:'DM Mono',monospace;opacity:0.6;}
+/* MAIN */
+#screen-main{max-width:900px;margin:0 auto;padding:0 1.5rem 4rem;}
+.story-header{padding:2rem 0 1.5rem;border-bottom:0.5px solid var(--paper-mid);margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.story-header-title{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--ink-mid);font-style:italic;}
+/* NAV */
+.chapter-nav{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-bottom:2.5rem;}
+.chapter-pill{aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:0.72rem;font-weight:500;border:1.5px solid var(--paper-mid);background:var(--paper);color:var(--ink-light);transition:all 0.15s;}
+.chapter-pill.unlocked{border-color:var(--accent-light);color:var(--accent);cursor:pointer;}
+.chapter-pill.unlocked:hover{background:var(--accent-pale);}
+.chapter-pill.current{background:var(--accent);color:var(--paper);border-color:var(--accent);}
+.chapter-pill.complete{background:var(--teal-light);border-color:var(--teal);color:var(--teal);cursor:pointer;}
+.chapter-pill.locked{cursor:default;opacity:0.35;}
+/* CHAPTER */
+.chapter-eyebrow{font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;color:var(--ink-light);text-transform:uppercase;margin-bottom:0.5rem;}
+.chapter-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.2;color:var(--ink);margin-bottom:0.6rem;}
+.chapter-divider{display:flex;align-items:center;gap:0.8rem;margin:1.2rem 0 2rem;}
+.chapter-divider-line{flex:1;height:0.5px;background:var(--paper-mid);}
+.chapter-divider-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+/* READ ALOUD */
+.read-aloud-bar{display:flex;align-items:center;gap:0.6rem;padding:0.6rem 1rem;background:var(--paper-warm);border:0.5px solid var(--paper-mid);border-radius:var(--r);margin-bottom:1.8rem;flex-wrap:wrap;}
+.read-aloud-bar span{font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--ink-mid);}
+.btn-ra{padding:0.28rem 0.75rem;border:0.5px solid var(--paper-mid);border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.72rem;cursor:pointer;background:var(--paper);color:var(--ink-mid);transition:all 0.15s;letter-spacing:0.03em;}
+.btn-ra:hover{border-color:var(--teal);color:var(--teal);}
+.btn-ra.active-play{background:var(--teal);color:#fff;border-color:var(--teal);}
+.btn-ra.active-pause{background:var(--accent-pale);color:var(--accent);border-color:var(--accent);}
+.btn-ra:disabled{opacity:0.35;cursor:default;}
+.speed-select{font-family:'DM Mono',monospace;font-size:0.72rem;padding:0.25rem 0.5rem;border:0.5px solid var(--paper-mid);border-radius:var(--r);background:var(--paper);color:var(--ink-mid);}
+/* STORY TEXT */
+.story-text{font-size:1.06rem;line-height:1.9;color:var(--ink);}
+.story-text p{margin-bottom:1.2em;}
+.story-text .word-tap{cursor:pointer;border-bottom:1.5px dotted var(--accent-light);transition:background 0.12s;border-radius:2px;padding:0 1px;}
+.story-text .word-tap:hover{background:var(--accent-pale);}
+.story-text .word-tap.in-vocab{border-bottom-color:var(--teal);background:var(--teal-light);}
+.story-text .word-any{cursor:pointer;}
+.story-text .word-any:hover{background:var(--accent-pale);border-radius:2px;}
+.story-text .word-any.in-vocab{background:var(--teal-light);border-radius:2px;}
+/* POPUP */
+.word-popup{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:0.7rem 1.2rem;border-radius:var(--rl);font-family:'DM Mono',monospace;font-size:0.8rem;z-index:1000;max-width:360px;width:92%;text-align:center;display:none;}
+.word-popup.show{display:block;animation:popIn 0.18s ease;}
+.word-popup .wname{font-size:1rem;font-weight:500;margin-bottom:0.25rem;font-family:'Playfair Display',serif;}
+.word-popup .wdef{font-size:0.78rem;color:#b0a898;line-height:1.5;}
+.word-popup .wdef.no-def{font-style:italic;opacity:0.7;}
+.popup-actions{display:flex;gap:0.5rem;justify-content:center;margin-top:0.65rem;flex-wrap:wrap;}
+.pbtn{padding:0.25rem 0.7rem;border-radius:var(--r);border:1px solid rgba(255,255,255,0.2);background:transparent;color:var(--paper);font-family:'DM Mono',monospace;font-size:0.7rem;cursor:pointer;transition:background 0.15s;}
+.pbtn:hover{background:rgba(255,255,255,0.12);}
+.pbtn.add{background:var(--teal);border-color:var(--teal);}
+.pbtn:disabled{opacity:0.45;cursor:default;}
+@keyframes popIn{from{opacity:0;transform:translateX(-50%) translateY(6px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+.section-break{text-align:center;margin:2.5rem 0;color:var(--accent-light);font-size:1rem;letter-spacing:0.5em;}
+/* QUESTIONS */
+.questions-section{margin-top:3rem;border-top:1px solid var(--paper-mid);padding-top:2rem;}
+.questions-header{display:flex;align-items:baseline;gap:1rem;margin-bottom:0.4rem;}
+.questions-title{font-family:'Playfair Display',serif;font-size:1.3rem;}
+.questions-meta{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--ink-light);}
+.questions-intro{font-style:italic;color:var(--ink-mid);font-size:0.92rem;margin-bottom:2rem;}
+.question-block{background:var(--paper-warm);border:0.5px solid var(--paper-mid);border-radius:var(--rl);padding:1.2rem 1.4rem;margin-bottom:1.2rem;}
+.question-num{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--ink-light);letter-spacing:0.06em;margin-bottom:0.4rem;}
+.question-text{font-size:0.97rem;color:var(--ink);margin-bottom:0.9rem;line-height:1.6;}
+.mc-options{display:flex;flex-direction:column;gap:0.45rem;}
+.mc-option{display:flex;align-items:flex-start;gap:0.6rem;padding:0.5rem 0.8rem;border:0.5px solid var(--paper-mid);border-radius:var(--r);cursor:pointer;font-size:0.9rem;background:var(--paper);transition:all 0.15s;line-height:1.5;}
+.mc-option:hover{border-color:var(--accent-light);background:var(--accent-pale);}
+.mc-option.selected{border-color:var(--accent);background:var(--accent-pale);color:var(--accent);}
+.mc-option input[type=radio]{margin-top:2px;flex-shrink:0;accent-color:var(--accent);}
+.mc-other-wrap{margin-top:0.6rem;display:none;}
+.mc-other-wrap.show{display:block;}
+.mc-other-input{width:100%;padding:0.55rem 0.75rem;border:0.5px solid var(--paper-mid);border-radius:var(--r);background:var(--paper);font-family:'Source Serif 4',serif;font-size:0.9rem;color:var(--ink);}
+.mc-other-input:focus{outline:none;border-color:var(--accent-light);}
+.q-status{font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--success);margin-top:0.6rem;display:none;}
+.q-status.show{display:block;}
+/* VOCAB */
+.vocab-section{margin-top:2rem;border-top:0.5px solid var(--paper-mid);padding-top:1.5rem;}
+.vocab-title{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:0.3rem;}
+.vocab-subtitle{font-size:0.85rem;color:var(--ink-mid);font-style:italic;margin-bottom:1rem;}
+.vocab-empty{font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--ink-light);}
+.vocab-list{display:flex;flex-wrap:wrap;gap:0.5rem;}
+.vocab-chip{display:flex;align-items:center;gap:0.4rem;padding:0.3rem 0.65rem;background:var(--teal-light);border:0.5px solid var(--teal);border-radius:100px;font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--teal);}
+.vocab-chip button{background:none;border:none;cursor:pointer;color:var(--teal);font-size:0.9rem;line-height:1;padding:0;opacity:0.6;transition:opacity 0.15s;}
+.vocab-chip button:hover{opacity:1;}
+/* MATCHING */
+.match-section{margin-top:2rem;border-top:0.5px solid var(--paper-mid);padding-top:1.5rem;}
+.match-title{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:0.3rem;}
+.match-subtitle{font-size:0.85rem;color:var(--ink-mid);font-style:italic;margin-bottom:1.2rem;}
+.match-row{background:var(--paper-warm);border:0.5px solid var(--paper-mid);border-radius:var(--rl);padding:0.9rem 1.1rem;margin-bottom:0.8rem;}
+.match-word{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--accent);margin-bottom:0.6rem;}
+.match-field{margin-bottom:0.55rem;}
+.match-label{display:block;font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-light);margin-bottom:0.25rem;}
+.match-select{width:100%;padding:0.5rem 0.65rem;border:0.5px solid var(--paper-mid);border-radius:var(--r);background:var(--paper);font-family:'Source Serif 4',serif;font-size:0.88rem;color:var(--ink);}
+.match-select.correct{border-color:var(--success);background:var(--success-bg);}
+.match-select.retry{border-color:var(--gold);background:var(--gold-light);}
+.match-check-btn{margin-top:0.5rem;padding:0.6rem 1.6rem;background:var(--teal);color:#fff;border:none;border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.8rem;letter-spacing:0.05em;cursor:pointer;transition:background 0.15s;}
+.match-check-btn:hover{background:#1f5150;}
+.match-feedback{font-family:'DM Mono',monospace;font-size:0.75rem;margin-top:0.8rem;color:var(--ink-mid);}
+/* SESSION SUMMARY (inline, every chapter) */
+.session-block{margin-top:2.5rem;border-top:0.5px solid var(--paper-mid);padding-top:1.5rem;}
+.session-title{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:0.3rem;}
+.session-subtitle{font-size:0.85rem;color:var(--ink-mid);font-style:italic;margin-bottom:1rem;}
+.session-stats{background:var(--paper-warm);border:0.5px solid var(--paper-mid);border-radius:var(--rl);padding:1rem 1.2rem;margin-bottom:1rem;}
+.session-stat-row{display:flex;justify-content:space-between;font-size:0.88rem;padding:0.25rem 0;border-bottom:0.5px solid var(--paper-mid);color:var(--ink-mid);}
+.session-stat-row:last-child{border-bottom:none;}
+.session-stat-val{font-family:'DM Mono',monospace;color:var(--ink);}
+.download-row{display:flex;gap:0.7rem;flex-wrap:wrap;align-items:center;}
+.btn-download{padding:0.65rem 1.4rem;background:var(--accent);color:var(--paper);border:none;border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.78rem;letter-spacing:0.05em;cursor:pointer;transition:background 0.15s,transform 0.1s;}
+.btn-download:hover{background:var(--accent-light);transform:translateY(-1px);}
+.btn-download.secondary{background:var(--teal);}
+.btn-download.secondary:hover{background:#1f5150;}
+.download-note{font-family:'DM Mono',monospace;font-size:0.74rem;color:var(--ink-light);margin-top:0.7rem;line-height:1.7;}
+.download-note strong{color:var(--teal);}
+.download-confirm{font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--teal);font-weight:500;margin-top:0.6rem;display:none;}
+.download-confirm.show{display:block;}
+/* COMPLETE */
+.complete-banner{display:none;background:var(--success-bg);border:0.5px solid var(--success);border-radius:var(--rl);padding:1rem 1.4rem;margin-top:1.5rem;text-align:center;}
+.complete-banner.show{display:block;}
+.complete-banner p{font-size:0.9rem;color:var(--success);font-family:'DM Mono',monospace;}
+.complete-banner .next-btn{margin-top:0.8rem;padding:0.6rem 1.5rem;background:var(--accent);color:var(--paper);border:none;border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.78rem;cursor:pointer;letter-spacing:0.05em;transition:background 0.15s;}
+.complete-banner .next-btn:hover{background:var(--accent-light);}
+/* GOTO SUMMARY SCREEN LINK */
+.finish-session-area{margin-top:2rem;text-align:center;}
+.btn-session-summary{padding:0.7rem 1.8rem;background:transparent;color:var(--ink-mid);border:0.5px solid var(--paper-mid);border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.78rem;letter-spacing:0.04em;cursor:pointer;transition:all 0.15s;}
+.btn-session-summary:hover{border-color:var(--accent);color:var(--accent);}
+/* SUMMARY SCREEN (full, separate) */
+#screen-summary{max-width:800px;margin:0 auto;padding:3rem 1.5rem 5rem;}
+.summary-header{text-align:center;margin-bottom:3rem;padding-bottom:2rem;border-bottom:0.5px solid var(--paper-mid);}
+.summary-title{font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:0.5rem;}
+.summary-date{font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--ink-light);}
+.summary-block{background:var(--paper-warm);border:0.5px solid var(--paper-mid);border-radius:var(--rl);padding:1.2rem 1.4rem;margin-bottom:1.2rem;}
+.summary-block-title{font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:0.8rem;}
+.summary-response{margin-bottom:0.8rem;}
+.summary-response-q{font-size:0.82rem;color:var(--ink-mid);font-style:italic;margin-bottom:0.2rem;}
+.summary-response-a{font-size:0.9rem;color:var(--ink);background:var(--paper);border-radius:var(--r);padding:0.4rem 0.6rem;border:0.5px solid var(--paper-mid);}
+.summary-actions{display:flex;gap:0.8rem;flex-wrap:wrap;justify-content:center;margin-top:2rem;}
+.btn-primary{padding:0.7rem 1.8rem;background:var(--accent);color:var(--paper);border:none;border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.8rem;letter-spacing:0.06em;cursor:pointer;transition:background 0.15s,transform 0.1s;}
+.btn-primary:hover{background:var(--accent-light);transform:translateY(-1px);}
+.btn-secondary{padding:0.7rem 1.8rem;background:transparent;color:var(--ink-mid);border:0.5px solid var(--paper-mid);border-radius:var(--r);font-family:'DM Mono',monospace;font-size:0.8rem;cursor:pointer;transition:all 0.15s;}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent);}
+.email-reminder{margin-top:1.5rem;text-align:center;font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--ink-light);line-height:1.7;}
+.email-reminder strong{color:var(--teal);}
+/* PRINT / SAVE AS PDF — matches The Tide Comes In summary workflow */
+@media print{
+  #screen-cover,#screen-main,#site-footer,.summary-actions,.no-print{display:none!important;}
+  #screen-summary{display:block!important;padding:0;max-width:100%;}
+  .summary-block{break-inside:avoid;border:1px solid #ccc;background:#fff;}
+  body{background:#fff;}
+}
+@media(max-width:600px){.chapter-nav{grid-template-columns:repeat(5,1fr);}.story-header{flex-direction:column;align-items:flex-start;}.chapter-title{font-size:1.6rem;}.download-row{flex-direction:column;align-items:stretch;}}
+/* FOOTER */
+#site-footer{width:100%;border-top:0.5px solid var(--paper-mid);margin-top:0;padding:1.1rem 1.5rem;background:var(--paper);}
+.footer-inner{max-width:900px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:0.4rem 0.6rem;font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--ink-light);line-height:1.6;}
+.footer-sep{opacity:0.4;}
+.footer-inner a{color:var(--ink-light);text-decoration:none;border-bottom:0.5px solid currentColor;transition:color 0.15s;}
+.footer-inner a:hover{color:var(--ink-mid);}
+body.cover-active #site-footer{background:var(--ink);border-top-color:rgba(255,255,255,0.08);}
+body.cover-active .footer-inner,body.cover-active .footer-inner a{color:rgba(255,255,255,0.25);}
+@media(max-width:600px){.footer-inner{flex-direction:column;align-items:flex-start;gap:0.2rem;}.footer-sep{display:none;}}
+</style>
+</head>
+<body>
+<div id="screen-cover" class="active">
+  <div class="cover-eyebrow">Book two &middot; a Tide Comes In sequel</div>
+  <div class="cover-wave"></div>
+  <div class="cover-title">Fair<br>Weather</div>
+  <div class="cover-subtitle">Rawiri's story</div>
+  <div class="cover-wave"></div>
+  <p class="cover-tagline">Ten chapters. One boy learning that being chosen and being known aren't always the same thing.</p>
+  <button class="cover-btn" id="cover-read-btn" onclick="showMain()">Begin reading</button>
+  <div class="cover-note">tap any word in the story to hear it and add it to your vocab list</div>
+</div>
+
+<div id="screen-main">
+  <div class="story-header">
+    <div class="story-header-title">Fair Weather</div>
+  </div>
+  <div class="chapter-nav" id="chapter-nav"></div>
+  <div id="chapter-container"></div>
+</div>
+
+<div id="screen-summary">
+  <div class="summary-header">
+    <div class="summary-title">Full Session Summary</div>
+    <div class="summary-date" id="summary-date"></div>
+  </div>
+  <div id="summary-content"></div>
+  <div class="summary-actions no-print">
+    <button class="btn-primary" onclick="printSummary()">🖨 Save as PDF</button>
+    <button class="btn-secondary" onclick="backToStory()">&larr; Back to story</button>
+  </div>
+  <div class="email-reminder no-print">After saving, email to <strong>gwen@mobihealthcare.com.au</strong></div>
+  <div id="after-print-prompt" class="no-print" style="display:none;margin-top:1.5rem;text-align:center;font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--teal);font-weight:500;">
+    Save/print dialog closed ✓ — <button onclick="backToStory()" style="background:none;border:none;font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--teal);font-weight:700;cursor:pointer;text-decoration:underline;">return to story →</button>
+  </div>
+</div>
+
+<div class="word-popup" id="word-popup">
+  <div class="wname" id="popup-word"></div>
+  <div class="wdef" id="popup-def"></div>
+  <div class="popup-actions">
+    <button class="pbtn add" id="popup-add-btn" onclick="addCurrentWordToVocab()">Add to vocab list</button>
+    <button class="pbtn" onclick="closePopup()">Close</button>
+  </div>
+</div>
+
+<footer id="site-footer">
+  <div class="footer-inner">
+    <span>&copy; 2026 Gwen Gan. All rights reserved.</span>
+    <span class="footer-sep">&middot;</span>
+    <span>Developed for the intended family and treating clinicians only. Not for redistribution.</span>
+    <span class="footer-sep">&middot;</span>
+    <span>Enquiries: <a href="mailto:gwengan96@gmail.com">gwengan96@gmail.com</a></span>
+  </div>
+</footer>
+
+<script>
+// ── DEFINITIONS ──────────────────────────────────────────────────
+const DEFS={
+  overcast:"Covered with cloud; grey and without direct sun.",
+  dispersed:"Spread out or scattered over an area, rather than staying together.",
+  static:"Not moving or changing; staying the same for a long time.",
+  transient:"Lasting only a short time; passing through rather than staying.",
+  meticulous:"Done with great attention to detail and care.",
+  wary:"Feeling or showing caution about possible danger or problems.",
+  provisional:"Arranged for the present, likely to change once more is known.",
+  threshold:"A point or line marking the start of something new.",
+  composure:"The state of feeling calm and in control of your feelings.",
+  unassuming:"Not drawing attention to yourself; modest.",
+  calculated:"Done deliberately, with the likely outcome considered in advance.",
+  apprehensive:"Anxious or fearful about something that might happen.",
+  "glossed over":"Described briefly or dismissively, avoiding the difficult parts.",
+  deflect:"To turn something away from its original direction, especially attention or a question.",
+  overstimulated:"Affected by too much noise, activity, or sensation at once.",
+  suppressed:"Stopped yourself from showing or expressing something.",
+  congenial:"Pleasant and friendly; easy to get along with.",
+  facade:"An outward appearance that hides what is really underneath.",
+  unraveling:"Coming apart, gradually, after being held together.",
+  composed:"Calm and in control, especially under pressure.",
+  bluntly:"In a very direct way, without trying to soften the message.",
+  disingenuous:"Not truly honest or sincere, while appearing to be so.",
+  kindred:"Similar in nature; having the same background or experience as you.",
+  unmasked:"Revealed as they truly are, with any disguise removed.",
+  skeptical:"Not easily convinced; having doubts.",
+  barometric:"Relating to atmospheric pressure, often used to describe weather changes.",
+  foreboding:"A feeling that something bad is about to happen.",
+  restraint:"Deliberate control over your own behaviour or feelings.",
+  exhausting:"Making you feel extremely tired, often after sustained effort.",
+  intuition:"A feeling or understanding of something without needing to reason it out.",
+  subdued:"Quieter or less lively than usual.",
+  precarious:"Not safe or stable; likely to change or fail suddenly.",
+  resigned:"Having accepted something unwelcome as unavoidable.",
+  contingent:"Dependent on something else happening first.",
+  isolate:"To separate someone or something from others.",
+  authentic:"Real and genuine; true to who someone actually is.",
+  misleading:"Giving the wrong idea or impression, even without a direct lie.",
+  overwhelmed:"Affected so strongly by something that you cannot cope with it easily.",
+  involuntary:"Happening without you choosing or controlling it.",
+  mortified:"Feeling extremely embarrassed or ashamed.",
+  flinched:"Made a small, sudden movement in reaction to something painful or startling.",
+  spiralling:"Getting worse quickly, in a way that feels hard to stop.",
+  raw:"Very open and unprotected; not softened or hidden.",
+  unflinching:"Not showing fear or hesitation, even in a difficult moment.",
+  steadied:"Made calm and stable after being unsteady or upset.",
+  genuine:"Real and sincere; not pretended.",
+  undeterred:"Not discouraged or stopped by difficulty.",
+  humbled:"Made to feel less proud, often by realising something important.",
+  reflective:"Thinking carefully and deeply about something.",
+  articulate:"Able to express thoughts and feelings clearly.",
+  hesitant:"Slow to act or speak because you are uncertain.",
+  cathartic:"Providing relief from strong or repressed emotions.",
+  vulnerable:"Open to being hurt; without your usual protection.",
+  resolve:"Firm determination to do something.",
+  unclouded:"Clear; without anything blocking the view or the truth.",
+  steadfast:"Firm and unchanging, especially in loyalty or purpose.",
+  settled:"Resolved, calm, or established after a period of uncertainty.",
+  enduring:"Lasting for a long time; continuing without breaking.",
+  provisional_placement:"A temporary living arrangement, used until a longer-term plan is decided."
+};
+
+// ── CHAPTERS DATA ──────────────────────────────────────────────────
+const CHAPTERS=[
+  {
+    "num": 1,
+    "title": "Between Systems",
+    "text": "<p>Rawiri kept a notebook of clouds.</p>\n<p>Not drawings — he wasn't interested in drawing them. He wrote what they were called, what came before them, what usually came after. Cirrus meant fine weather, usually, unless it thickened. A ring around the sun meant rain within a day, nearly always. He had been keeping the notebook for eleven months, which was longer than he'd stayed anywhere else in that time.</p>\n<p>Rangimārie House had a name that meant peace, which the other kids thought was funny, because it wasn't really that, or wasn't only that. It was a low, warm building near the edge of town with eight beds and a kitchen that smelled permanently of toast, and staff who worked in shifts, and a rule that nobody stayed forever. Some kids were there two nights. Rawiri had been there since winter. New arrivals often paused at the front-door <u class=\"word-tap\" data-word=\"threshold\">threshold</u> before coming inside, as if the doorway itself needed a decision.</p>\n<p>He sat at the window in the common room with his notebook and watched a bank of <u class=\"word-tap\" data-word=\"overcast\">overcast</u> cloud sit unmoving over the hills. It hadn't moved in an hour. That happened sometimes — a weather system got stuck between two fronts, not being pushed one way or the other, just waiting.</p>\n<p>He knew exactly how that felt.</p>\n<p>\"Still at it?\" Moana asked, dropping into the chair across from him. Fa'amoana was the closest thing Rangimārie House had to a fixture — she'd worked there longer than any placement lasted, and she had a way of asking questions that didn't feel like she was collecting information for a file. She nodded at the notebook. \"What's today's forecast?\"</p>\n<p>\"Clearing by Thursday. Maybe.\"</p>\n<p>\"Maybe.\"</p>\n<p>\"Clouds don't owe you certainty,\" Rawiri said. It was something he'd read once and liked enough to keep.</p>\n<p>Moana almost smiled. She had a Samoan grandmother and a way of going quiet before she said something that mattered, which Rawiri had learned to notice the same way he noticed a pressure drop before a storm. \"I've got something for you,\" she said. \"A family called the office. They want to meet you Saturday.\"</p>\n<p>Rawiri kept his eyes on the window. Six of his siblings were <u class=\"word-tap\" data-word=\"dispersed\">dispersed</u> across three different houses that he knew of, and the seventh — Maya — was on an island he'd never seen, with an aunt he'd never met. He had learned to stay <u class=\"word-tap\" data-word=\"wary\">wary</u> of getting his hopes caught on things that were still <u class=\"word-tap\" data-word=\"provisional\">provisional</u>.</p>\n<p>\"What kind of family?\"</p>\n<p>\"Good question. I don't fully know yet. I know they've fostered before. I know they asked for you specifically, not just 'a placement' — they read your file and asked for you.\" She said it plainly, not like it was supposed to fix anything. \"That's rarer than you'd think.\"</p>\n<p>Rawiri wrote a line in his notebook. Not about weather. He crossed it out before Moana could read it.</p>\n<p>\"You don't have to decide how you feel about it right now,\" Moana said. \"You've got till Saturday.\"</p>\n<p>\"I know how I feel about it.\"</p>\n<p>\"Do you.\" It wasn't really a question.</p>\n<p>He looked back out the window. The cloud bank still hadn't moved, but he could see, if he looked carefully, the faintest fraying at its western edge — the first sign a system was about to be pushed somewhere. He didn't know yet whether that was a good sign or not. With weather, you mostly didn't, until it had already happened.</p>\n<p>Rawiri was eleven years old. He had been <u class=\"word-tap\" data-word=\"meticulous\">meticulous</u> about a lot of things since he'd learned that being meticulous was one of the only things he could actually control. He closed the notebook.</p>\n<p>\"Saturday,\" he said. \"Okay.\"</p>",
+    "vocabMatch": [
+      {
+        "word": "overcast",
+        "definition": "Covered with cloud; grey and without direct sun.",
+        "example": "The sky stayed overcast all afternoon, so the beach was almost empty."
+      },
+      {
+        "word": "dispersed",
+        "definition": "Spread out or scattered over an area, rather than staying together.",
+        "example": "The flock of birds dispersed in every direction when the dog barked."
+      },
+      {
+        "word": "provisional",
+        "definition": "Arranged for the present, likely to change once more is known.",
+        "example": "They gave him a provisional timetable that might change once the new term started."
+      },
+      {
+        "word": "meticulous",
+        "definition": "Done with great attention to detail and care.",
+        "example": "She was meticulous about labelling every box before the move."
+      },
+      {
+        "word": "threshold",
+        "definition": "A point or line marking the start of something new.",
+        "example": "He paused at the threshold of the classroom, unsure whether to go in."
+      },
+      {
+        "word": "wary",
+        "definition": "Feeling or showing caution about possible danger or problems.",
+        "example": "The cat stayed wary of the new visitor, watching from across the room."
+      }
+    ],
+    "questions": [
+      {
+        "text": "Rawiri says clouds 'don't owe you certainty.' What does that line suggest about how he's learned to think about the future?",
+        "options": [
+          "Nothing good can be predicted, so planning is pointless",
+          "Weather makes more sense to him than other people do",
+          "He protects himself by not treating uncertain outcomes as promises",
+          "He has stopped caring what happens to him next"
+        ]
+      },
+      {
+        "text": "Moana tells him the family 'asked for you specifically' and says that's rarer than he'd think. What is she probably trying to help him feel?",
+        "options": [
+          "That being asked for by name is different from filling any available placement",
+          "That the family already knows exactly what living with him will be like",
+          "That he should feel excited because this placement is certain to work",
+          "That he owes the family a good first impression because they chose him"
+        ]
+      },
+      {
+        "text": "Rawiri writes something in his notebook, then crosses it out before Moana can read it. What does this small moment tell us?",
+        "options": [
+          "He is worried Moana will tease him about what he wrote",
+          "He changes his mind because the sentence no longer seems accurate",
+          "He wants to keep the notebook focused only on weather notes",
+          "A real reaction came up, but he was not ready to share it"
+        ]
+      },
+      {
+        "text": "If you were Rawiri and heard a family had asked for you by name, what do you think would be going through your head in the days before the visit?",
+        "options": [
+          "Mostly excitement, because being chosen removes most of the uncertainty",
+          "Hope mixed with caution, because he wants it to work but expects disappointment",
+          "Mostly anger, because the visit feels like another demand from adults",
+          "Very little reaction, because he has learned placements rarely matter"
+        ]
+      },
+      {
+        "text": "Moana says 'you don't have to decide how you feel about it right now.' If you were in Rawiri's position, would that kind of comment help — or would you want something different from an adult at that moment? What would you have wanted them to say instead?",
+        "options": [
+          "That comment would help — space to not decide yet feels right",
+          "I'd want them to just tell me it will definitely work out",
+          "I'd want them to tell me exactly how to feel",
+          "I'd want them to say nothing at all and just sit with me"
+        ]
+      }
+    ]
+  },
+  {
+    "num": 2,
+    "title": "The Visit List",
+    "text": "<p>Two days before the visit, a staff member named Greg sat down next to Rawiri at breakfast with the particular energy of someone who thought he was being helpful.</p>\n<p>\"Big Saturday coming up,\" Greg said. \"Just — keep it easy, yeah? Don't overthink it. Families want to see a kid who's chill. Low-key. You know what I mean?\"</p>\n<p>Rawiri did know what he meant, actually, which was the problem.</p>\n<p>Moana, across the kitchen, didn't say anything, but Rawiri caught her not-saying-anything, which was its own kind of comment. She waited until Greg had gone to do the linen run before she came and sat where he'd been.</p>\n<p>\"He's not wrong that first impressions matter,\" she said. \"He's not right about much else.\"</p>\n<p>\"So what do I do?\"</p>\n<p>\"You don't have to show them everything, but you shouldn’t have to hide every hard bit either.\" She turned her mug slowly on the table. \"You can be polite. You can keep things private. But if you have to hide every hard bit to make this work, that’s a lot to carry.\"</p>\n<p>Rawiri thought about that for the rest of the day, the way he thought about a forecast that didn't quite add up — turning it over, checking it against what he already knew. He had been called \"a lot\" by two separate emergency carers in the last year. Not cruelly. Just factually, the way you'd note that a system was bringing more rain than expected. He knew what happened when people found out he was \"a lot.\" They found reasons the timing wasn't right.</p>\n<p>That night he lay in bed and did what he always did before something uncertain — he ran a kind of forecast for himself. If they ask about school, say it's going okay, don't mention the meltdown in November. Even in his own rehearsal, he <u class=\"word-tap\" data-word=\"glossed over\">glossed over</u> that part quickly. If the house is loud, don't ask them to turn anything down. If they ask why, <u class=\"word-tap\" data-word=\"deflect\">deflect</u> with a joke. If I don't understand a joke, laugh anyway, work it out later. He built the model carefully, the way he'd build a five-day outlook, checking each piece against what he knew would keep his <u class=\"word-tap\" data-word=\"composure\">composure</u> intact.</p>\n<p>He was aware, in a distant way, that this was a kind of lying. He filed the thought somewhere he didn't have to look at it directly, the way you'd note a storm system forming far out at sea — real, but not yet anything you had to deal with.</p>\n<p>By the time he fell asleep, he had a plan. It was <u class=\"word-tap\" data-word=\"calculated\">calculated</u> down to which topics to avoid and which of his interests to mention, in careful, small amounts, so he'd seem <u class=\"word-tap\" data-word=\"unassuming\">unassuming</u> and interesting but not intense. He didn't think of it as pretending. He thought of it as being prepared.</p>\n<p>Manaia, who had the bed nearest the door and rarely slept before midnight, spoke into the dark. \"You're doing the thing.\"</p>\n<p>\"What thing.\"</p>\n<p>\"The thing where you go quiet and plan every sentence. I can hear you doing it. You get very still.\"</p>\n<p>Rawiri didn't answer.</p>\n<p>\"Just saying,\" Manaia said. \"I've seen it before. Doesn't always end how you think.\" She rolled over. Within a few minutes her breathing slowed into sleep, easy as anything, while Rawiri lay <u class=\"word-tap\" data-word=\"apprehensive\">apprehensive</u> and awake, running his forecast one more time from the beginning.</p>",
+    "vocabMatch": [
+      {
+        "word": "composure",
+        "definition": "The state of feeling calm and in control of your feelings.",
+        "example": "She kept her composure even when the microphone stopped working."
+      },
+      {
+        "word": "calculated",
+        "definition": "Done deliberately, with the likely outcome considered in advance.",
+        "example": "It was a calculated risk — he knew exactly what could go wrong before he tried it."
+      },
+      {
+        "word": "apprehensive",
+        "definition": "Anxious or fearful about something that might happen.",
+        "example": "She felt apprehensive walking into the exam room."
+      },
+      {
+        "word": "glossed over",
+        "definition": "Described briefly or dismissively, avoiding the difficult parts.",
+        "example": "He glossed over the part where the plan had actually failed the first time."
+      },
+      {
+        "word": "deflect",
+        "definition": "To turn something away from its original direction, especially attention or a question.",
+        "example": "She deflected the question by asking one back."
+      },
+      {
+        "word": "unassuming",
+        "definition": "Not drawing attention to yourself; modest.",
+        "example": "He gave an unassuming answer, careful not to seem like he was showing off."
+      }
+    ],
+    "questions": [
+      {
+        "text": "Moana says, “You don’t have to show them everything, but you shouldn’t have to hide every hard bit either.” What is she trying to help Rawiri understand?",
+        "options": [
+          "He should tell them every difficult thing before the first visit ends",
+          "He should keep all difficult reactions private until the placement is permanent",
+          "He should avoid trying to make a good impression because that would be pretending",
+          "He can keep things private without having to hide every important need"
+        ]
+      },
+      {
+        "text": "What does it tell us that Rawiri plans his entire visit down to which topics to avoid, before he's even met the family?",
+        "options": [
+          "Past rejection has taught him to plan what feels safe to show",
+          "He mainly enjoys planning and wants the visit to run efficiently",
+          "He assumes the family will dislike him no matter what he says",
+          "He wants Moana to see that he can prepare without anyone's help"
+        ]
+      },
+      {
+        "text": "Manaia says 'doesn't always end how you think' about Rawiri's planning and going quiet. What is she probably basing that on?",
+        "options": [
+          "She heard Greg warning him earlier and is repeating his advice",
+          "She thinks Rawiri worries too much and wants him to stop planning",
+          "She recognises a pattern she has seen or used in placements before",
+          "She has read his notebook and knows exactly what he is planning"
+        ]
+      },
+      {
+        "text": "If you were Rawiri lying awake before the visit, would you have made a plan like his — or done something different? What would you have done?",
+        "options": [
+          "Made a similar plan to feel prepared",
+          "Tried not to plan at all and just see what happens",
+          "Talked to Moana again before trying to sleep",
+          "Written down worries instead of a script for the visit"
+        ]
+      },
+      {
+        "text": "Greg tells Rawiri to 'keep it easy' before the visit. What would have been a more helpful thing for an adult to say to him instead?",
+        "options": [
+          "Tell him first impressions matter, so he should keep difficult needs private",
+          "Tell him not to prepare at all, because planning makes people seem fake",
+          "Tell him he can keep things private without hiding every important difficulty",
+          "Tell him the visit does not matter, so there is no reason to worry"
+        ]
+      }
+    ]
+  },
+  {
+    "num": 3,
+    "title": "Fine Skies",
+    "text": "<p>The Solomona house had a dog that barked at the gate, a doorbell that played four notes instead of one chime, and a smell of something frying that Rawiri didn't recognise and found, immediately, too much all at once.</p>\n<p>He didn't say so.</p>\n<p>Aroha Solomona opened the door with a smile that reached her eyes, which Rawiri noted the way he'd note a <u class=\"word-tap\" data-word=\"barometric\">barometric</u> reading — data, filed for later. \"You must be Rawiri. Come in, come in — sorry about Tiko, he's all noise.\" The dog kept barking. Rawiri's shoulders had gone tight the second the doorbell rang, but he made himself walk in like it was nothing, like four-note doorbells and unexpected dogs were the most normal thing in the world.</p>\n<p>Pati Solomona shook his hand like he was an adult, which Rawiri appreciated more than he let on. There was a little girl, maybe seven, hovering at the kitchen doorway — Meleana, who stared at him with the frank, unblinking interest of someone who hadn't yet learned to hide it.</p>\n<p>The visit went, by every visible measure, extremely well.</p>\n<p>Rawiri answered every question with careful, <u class=\"word-tap\" data-word=\"congenial\">congenial</u>, <u class=\"word-tap\" data-word=\"unassuming\">unassuming</u> warmth. He laughed at Pati's joke about the dog half a second before he actually understood it. When the schedule shifted without warning — lunch pushed forward because Meleana had swimming — he felt something spike hot and fast behind his ribs, the specific, wordless panic of a plan changing underneath him, and he pushed it down so hard and so fast that by the time he answered \"sounds good\" his voice sounded <u class=\"word-tap\" data-word=\"composed\">composed</u>.</p>\n<p>Nobody noticed. The <u class=\"word-tap\" data-word=\"facade\">facade</u> held. That was the point. That was, he told himself, a win.</p>\n<p>By the time Moana came to collect him, Aroha was practically glowing. \"He's just lovely,\" she said to Moana, loud enough for Rawiri to hear, meaning it as a kindness. \"So easy. Genuinely one of the easiest kids we've met.\"</p>\n<p>Rawiri smiled the way he'd planned to smile.</p>\n<p>In the car, Moana didn't say much for the first few minutes. Then: \"You held it together in there.\"</p>\n<p>\"It went well.\"</p>\n<p>\"It did.\" She was quiet again, watching the road. \"You know I could see you doing it, right? The lunch thing. Your jaw went tight and then you just — put it away.\"</p>\n<p>Rawiri looked out the window. The sky was clear, no cloud at all, which should have felt good and instead felt like a held breath.</p>\n<p>\"I don't want to mess it up,\" he said finally, quieter than he meant to.</p>\n<p>\"I know,\" Moana said. She didn't tell him he'd done the wrong thing. She didn't tell him he'd done the right thing either. \"I'm not going to pretend that was easy for you, even if it looked easy from where they were sitting.\"</p>\n<p>Rawiri didn't answer. He was too busy noticing, with a small, cold feeling he didn't have a word for yet, how tired he was from keeping so many reactions <u class=\"word-tap\" data-word=\"suppressed\">suppressed</u> for a whole afternoon — and how much more of it there was still to do, if this was going to work.</p>",
+    "vocabMatch": [
+      {
+        "word": "unassuming",
+        "definition": "Not drawing attention to yourself; modest.",
+        "example": "He gave an unassuming answer, careful not to seem like he was showing off."
+      },
+      {
+        "word": "suppressed",
+        "definition": "Stopped yourself from showing or expressing something.",
+        "example": "She suppressed a yawn during the long meeting."
+      },
+      {
+        "word": "congenial",
+        "definition": "Pleasant and friendly; easy to get along with.",
+        "example": "The atmosphere at the dinner was warm and congenial."
+      },
+      {
+        "word": "facade",
+        "definition": "An outward appearance that hides what is really underneath.",
+        "example": "Behind his calm facade, he was actually nervous the whole time."
+      },
+      {
+        "word": "composed",
+        "definition": "Calm and in control, especially under pressure.",
+        "example": "She stayed composed even after the surprise announcement."
+      },
+      {
+        "word": "barometric",
+        "definition": "Relating to atmospheric pressure, often used to describe weather changes.",
+        "example": "A sudden barometric drop usually means a storm is on its way."
+      }
+    ],
+    "questions": [
+      {
+        "text": "When the lunch schedule changes suddenly, Rawiri feels panic but forces his voice to stay steady. What does this tell us about the gap between how he felt and how he looked?",
+        "options": [
+          "His calm answer hides a much stronger internal reaction",
+          "His panic fades before he answers, so his voice matches how he feels",
+          "He is mainly annoyed that the family changed the lunch schedule",
+          "He notices the change but does not experience much emotion about it"
+        ]
+      },
+      {
+        "text": "Aroha calls him 'so easy' as a compliment. What does she not know about what that afternoon actually cost him?",
+        "options": [
+          "She knows he is working hard but assumes he prefers it that way",
+          "She thinks his calmness comes from enjoying every part of the visit",
+          "She notices the schedule was difficult but thinks he recovered easily",
+          "She cannot see how much effort and suppression produced the calm behaviour"
+        ]
+      },
+      {
+        "text": "Moana says 'I could see you doing it' but doesn't tell Rawiri he did the wrong thing or the right thing. Why might she choose not to judge it either way?",
+        "options": [
+          "She is unsure whether Greg's advice was useful, so she avoids commenting",
+          "She thinks Rawiri should have shown the family every reaction immediately",
+          "She can see the strategy helped him and also cost him a lot",
+          "She does not want to discuss the visit because she was not paying attention"
+        ]
+      },
+      {
+        "text": "If you were Rawiri in that kitchen when the schedule suddenly changed, what do you think you would have done differently — or the same?",
+        "options": [
+          "The same — hide the reaction and push through",
+          "Ask quietly for a minute to adjust",
+          "Say something honest about needing a moment",
+          "Let the panic show and see what happened"
+        ]
+      },
+      {
+        "text": "By the end of the chapter, Rawiri feels tired in a way that has nothing to do with physical activity. What is actually causing that tiredness?",
+        "options": [
+          "The noise, doorbell and changed lunch time have physically worn him out",
+          "Sustaining the controlled presentation has taken a lot of mental effort",
+          "He is tired mainly because he spent the afternoon concentrating on the family",
+          "He has a headache because he did not get enough rest before the visit"
+        ]
+      }
+    ]
+  },
+  {
+    "num": 4,
+    "title": "Static",
+    "text": "<p>Manaia found him on the back step two days later, notebook closed on his knee, staring at nothing in particular.</p>\n<p>\"You've been weird since Saturday,\" she said, sitting down without asking, the way she always did.</p>\n<p>\"I'm always weird.\"</p>\n<p>\"Weirder.\" She picked at a loose thread on her sleeve. Manaia was ten and had been in six placements that Rawiri knew of, which he understood was probably not the full number. She had a way of saying difficult things flatly, like weather reports, which was maybe why they got on. \"You did the thing where you made yourself very easy to read, didn't you. For the family.\"</p>\n<p>Rawiri didn't answer right away. \"I was polite. That's not pretending.\" He bristled at the idea that effort automatically made him <u class=\"word-tap\" data-word=\"disingenuous\">disingenuous</u>.</p>\n<p>\"No. Polite isn't pretending,\" Manaia said. \"And keeping some things to yourself isn't automatically pretending either. I've seen you polite. I've seen you relaxed, too, when it's just us — you go on for ten minutes about cloud types and nobody has to fake being interested because you're funny about it. Saturday looked like more work than that.\"</p>\n<p>He hated, a little, how accurately she'd landed on it. \"It worked. They liked me.\"</p>\n<p>\"They liked the version of me I could keep up for a while,\" Manaia said <u class=\"word-tap\" data-word=\"bluntly\">bluntly</u>, not unkindly. \"That was still me. It just wasn't all of me. At my third placement I was so easy they called me their little sunshine. Then I had a bad week and the strain I'd been hiding was suddenly <u class=\"word-tap\" data-word=\"unmasked\">unmasked</u>. I stopped being easy for about six hours. And that was it. They said it 'wasn't a good fit after all.'\"</p>\n<p>Rawiri felt something go cold and still in his chest. He was <u class=\"word-tap\" data-word=\"wary\">wary</u> of where she was taking this.</p>\n<p>\"I'm not saying masking is bad,\" Manaia added, watching his face. \"Sometimes it gets you through something. I still do it. I'm saying if people only meet the version of you who never needs quiet, never misses a joke, never gets overloaded, they don't get enough information to know what living with you is actually like. And you don't get to find out what happens when you ask for something.\"</p>\n<p>\"So what, I should've had a meltdown in their kitchen? Ruined it on purpose?\"</p>\n<p>\"I didn't say that either.\" She shrugged, <u class=\"word-tap\" data-word=\"skeptical\">skeptical</u> of her own certainty. \"There isn't some safe opposite where you deliberately fall apart and everything works out. I don't actually know the answer. I just know what happened to me, and I wanted you to know someone saw how hard you were working. That's all.\"</p>\n<p>They sat for a while without talking. A bank of cloud was building slowly out past the hills — nothing dramatic yet, just a thickening at the edges, the kind of change you'd only catch if you were the sort of person who watched skies for a living, or a hobby, or because it was easier than watching people.</p>\n<p>\"I don't know how to know what to show and what to keep to myself,\" Rawiri said eventually.</p>\n<p>Manaia didn't have an answer for that. She just bumped her shoulder against his, which was, from her, a significant gesture — a kind of <u class=\"word-tap\" data-word=\"kindred\">kindred</u> acknowledgment that didn't need explaining.</p>\n<p>\"Maybe you're not supposed to know yet,\" she said. \"Maybe that's not even the right question.\"</p>\n<p>Rawiri wrote something in his notebook. This time he didn't cross it out.</p>",
+    "vocabMatch": [
+      {
+        "word": "bluntly",
+        "definition": "In a very direct way, without trying to soften the message.",
+        "example": "She told him bluntly that the plan wouldn't work."
+      },
+      {
+        "word": "skeptical",
+        "definition": "Not easily convinced; having doubts.",
+        "example": "He stayed skeptical of the weather app's forecast after it was wrong twice."
+      },
+      {
+        "word": "kindred",
+        "definition": "Similar in nature; having the same background or experience as you.",
+        "example": "Meeting someone with a kindred experience made her feel less alone."
+      },
+      {
+        "word": "unmasked",
+        "definition": "Revealed as they truly are, with any disguise removed.",
+        "example": "By the end of the week, his real exhaustion was unmasked for everyone to see."
+      },
+      {
+        "word": "disingenuous",
+        "definition": "Not truly honest or sincere, while appearing to be so.",
+        "example": "His cheerful answer felt disingenuous, like it was covering something up."
+      },
+      {
+        "word": "wary",
+        "definition": "Feeling or showing caution about possible danger or problems.",
+        "example": "After what happened before, she stayed wary of getting too hopeful."
+      }
+    ],
+    "questions": [
+      {
+        "text": "Manaia says the version she showed a past family 'was still me. It just wasn't all of me.' What distinction is she making?",
+        "options": [
+          "Masking means presenting a completely invented personality to other people",
+          "Privacy stops people from ever learning anything important about someone",
+          "A person should show every need immediately if they want to be understood",
+          "A masked presentation can still be real while leaving important needs unseen"
+        ]
+      },
+      {
+        "text": "Manaia shares what happened at her third placement. Why do you think she tells this story instead of just saying 'don't do that'?",
+        "options": [
+          "Her experience gives Rawiri evidence and shows she understands the risk personally",
+          "She wants him to feel frightened enough to cancel the next family visit",
+          "She believes her past placement proves the Solomona family will reject him too",
+          "She would rather tell her own story than listen to Rawiri's concerns"
+        ]
+      },
+      {
+        "text": "Rawiri asks 'so what, I should've had a meltdown in their kitchen?' and Manaia says that's not what she meant either. What does this exchange tell us about the actual dilemma he's facing?",
+        "options": [
+          "Rawiri needs to stop masking completely before the next visit",
+          "Keeping everything private is safer than letting the family see any difficulty",
+          "Masking may protect him, but deliberately falling apart is not a safe opposite",
+          "The best solution is to let Moana decide what he should reveal"
+        ]
+      },
+      {
+        "text": "If you were Manaia and had been through what happened at her third placement, would you have shared that story with Rawiri — or kept it to yourself? What would you have done?",
+        "options": [
+          "Shared it, like she did, to help him see clearly",
+          "Kept it private and just told him to be careful",
+          "Shared it but waited for a better moment",
+          "Told a staff member instead of telling Rawiri directly"
+        ]
+      },
+      {
+        "text": "By the end of the chapter, Rawiri writes something in his notebook and doesn't cross it out this time. What do you think that small change means?",
+        "options": [
+          "He is becoming less interested in protecting the privacy of his notebook",
+          "He is allowing one difficult thought to remain instead of immediately erasing it",
+          "He wants Manaia to read the sentence later and tell him what it means",
+          "He has decided that crossing things out makes his weather notes harder to read"
+        ]
+      }
+    ]
+  },
+  {
+    "num": 5,
+    "title": "The Front Moves In",
+    "text": "<p>The second visit was at the Solomonas' bach, two hours south, for the whole day. Rawiri had checked the forecast three times before they left. He had even checked the <u class=\"word-tap\" data-word=\"barometric\">barometric</u> pressure trend. Scattered showers, clearing by afternoon, moderate wind. He packed a jacket nobody asked him to pack.</p>\n<p>He was right about the showers. He was wrong about the wind.</p>\n<p>By early afternoon it had built into something the forecast hadn't predicted at all — a squally, <u class=\"word-tap\" data-word=\"foreboding\">foreboding</u> front moving in fast off the coast, the kind that turned a beach walk into something else entirely. Pati checked his phone and swore quietly. \"We should head back before this gets worse. Change of plan — pack up now.\"</p>\n<p>A change of plan. Sudden, unscheduled, out of nowhere.</p>\n<p>Rawiri felt the old, familiar lurch — the world tilting slightly off its axis, his whole body bracing for something he couldn't name. And underneath the lurch, something else: he'd actually clocked this front building an hour ago, in the shift of the cloud base, in a pressure feeling in his own ears — a kind of weather <u class=\"word-tap\" data-word=\"intuition\">intuition</u> he'd learned, over months of watching, to trust. He wanted, badly, to say so. To say I know, I saw this coming, look — and show them the exact moment the isobars would have tightened on a map, because it was the truest, most alive thing in him and for one unguarded second he almost let it out.</p>\n<p>He caught himself.</p>\n<p>Too much. Too weird. Nobody wants an eleven-year-old lecturing them about isobars in the middle of an emergency.</p>\n<p>\"Sounds good,\" he said instead, flat and easy, and helped fold the chairs.</p>\n<p>The drive back was tense in the ordinary way — wipers on full, Meleana asking too many questions, Pati's jaw tight with concentration. Rawiri sat very still and said nothing and used every ounce of <u class=\"word-tap\" data-word=\"restraint\">restraint</u> he had not to point out that they should take the inland road, not the coast road, because the coast road flooded first in weather like this, every single time, he'd read about it, he was almost certain —</p>\n<p>They took the coast road. It didn't flood, not that day. But Rawiri sat with the unsaid thing lodged behind his sternum the entire way home, and by the time they dropped him back at Rangimārie House his head was pounding in a way that had nothing to do with the weather and everything to do with the sheer, <u class=\"word-tap\" data-word=\"exhausting\">exhausting</u> effort of staying quiet, staying easy, staying small enough not to be a problem.</p>\n<p>Moana took one look at him in the doorway and didn't ask how the visit went. She just said, \"Kitchen's quiet. Go sit.\"</p>\n<p>He sat at the table with his head in his hands while she made tea neither of them was going to drink for a while.</p>\n<p>\"You look like you fought a war,\" she said eventually.</p>\n<p>\"I didn't say anything the whole day.\"</p>\n<p>\"I can tell.\" She put the mug down near him, not pushing it. \"That's not nothing, you know. What that costs.\"</p>\n<p>Rawiri didn't answer. He was thinking, in the <u class=\"word-tap\" data-word=\"subdued\">subdued</u>, wrung-out way you think after a long effort, about how he'd known exactly what was coming — the weather, the flooding risk, all of it — and had said none of it, because knowing things and being allowed to say them out loud had turned out, somewhere along the way, to be two very separate skills, and he'd only ever been trusted to have one.</p>",
+    "vocabMatch": [
+      {
+        "word": "foreboding",
+        "definition": "A feeling that something bad is about to happen.",
+        "example": "A foreboding stillness settled over the paddock before the storm hit."
+      },
+      {
+        "word": "restraint",
+        "definition": "Deliberate control over your own behaviour or feelings.",
+        "example": "It took real restraint not to correct him in front of everyone."
+      },
+      {
+        "word": "subdued",
+        "definition": "Quieter or less lively than usual.",
+        "example": "The whole class went subdued after the fire alarm test."
+      },
+      {
+        "word": "exhausting",
+        "definition": "Making you feel extremely tired, often after sustained effort.",
+        "example": "Staying polite through the whole visit had been exhausting."
+      },
+      {
+        "word": "intuition",
+        "definition": "A feeling or understanding of something without needing to reason it out.",
+        "example": "Her intuition told her to double-check the door was locked."
+      },
+      {
+        "word": "barometric",
+        "definition": "Relating to atmospheric pressure, often used to describe weather changes.",
+        "example": "He tracked the barometric pressure every morning in his notebook."
+      }
+    ],
+    "questions": [
+      {
+        "text": "Rawiri notices the storm building before anyone else does, but doesn't say anything. What does this tell us about what he's learned to prioritise?",
+        "options": [
+          "He thinks Pati already understands the weather, so speaking up would add nothing",
+          "He wants to avoid being responsible if his forecast about the road is wrong",
+          "He prioritises seeming easy over sharing knowledge that might be useful",
+          "He is too overwhelmed by the storm to remember what he knows"
+        ]
+      },
+      {
+        "text": "Rawiri knows the coast road floods first but doesn't mention it, even as a safety concern. What does this reveal about the size of the cost he's paying to seem easy?",
+        "options": [
+          "His effort to seem easy is now stopping him from sharing safety-relevant information",
+          "He has become less confident in his weather knowledge after getting the wind wrong",
+          "He only stays quiet because the coast road has not flooded that day yet",
+          "He wants Pati to make the route decision without advice from anyone else"
+        ]
+      },
+      {
+        "text": "Moana says 'that's not nothing, you know. What that costs.' What is she naming, specifically?",
+        "options": [
+          "The physical strain of travelling for a full day in bad weather",
+          "The disappointment of predicting the wind incorrectly after checking several forecasts",
+          "The frustration of not being asked enough questions by the Solomona family",
+          "The emotional and physical effort of monitoring and suppressing himself all day"
+        ]
+      },
+      {
+        "text": "If you were Rawiri and had spotted the storm building an hour early, would you have said something — even briefly — or stayed quiet like he did? What would have made the difference for you?",
+        "options": [
+          "Said something briefly, safety mattered enough to risk it",
+          "Stayed quiet, same as he did",
+          "Told Moana afterwards instead of the family in the moment",
+          "Written it in the notebook and shown someone later"
+        ]
+      },
+      {
+        "text": "By the end of the chapter, what is actually causing Rawiri's headache?",
+        "options": [
+          "The storm and long drive have given him an ordinary travel headache",
+          "The sustained effort of suppressing reactions and useful information has worn him down",
+          "He is worried that his weather knowledge was not accurate enough to help",
+          "He is exhausted because he spent most of the visit talking too much"
+        ]
+      }
+    ]
+  },
+  {
+    "num": 6,
+    "title": "What the Weather Costs",
+    "text": "<p>Moana waited until the tea had gone cold before she said what she'd clearly been holding since the doorway.</p>\n<p>\"I need to tell you something, and I need you to actually hear it, not just wait for me to finish.\"</p>\n<p>Rawiri looked up.</p>\n<p>\"If this placement doesn't happen — for whatever reason — the next option isn't another Rangimārie. It's a specialist unit two towns over. Good people, but it's further from here, further from your school, further from any chance of the kind of visits you've had with your brothers.\" She said it plainly, no drama in her voice, the way you'd report a fact about tomorrow's weather. \"I'm not telling you that to scare you. I'm telling you because you're making decisions right now without the full picture, and you deserve the full picture.\"</p>\n<p>Rawiri felt the words land somewhere low and heavy. \"So I do need to keep being easy.\"</p>\n<p>\"That's not what I said.\" Moana held his eyes. \"Masking can be useful. Sometimes it's how you get through a room that doesn't feel safe, and I'm not going to tell you to throw away something that's protected you. I'm worried about what it costs if you have to do it every minute.\"</p>\n<p>\"So what am I supposed to do?\"</p>\n<p>\"You don't have to show everything or prove anything. Maybe give them enough accurate information to work with. Tell them sudden changes and loud noises are hard. Tell them quiet helps. Let them see that weather isn't a small interest you can just switch off. An <u class=\"word-tap\" data-word=\"authentic\">authentic</u> picture doesn't mean every thought and reaction has to be visible. It means the important parts don't all have to be hidden.\"</p>\n<p>Rawiri thought about the storm on the coast road. About the exact words he hadn't said. About Manaia's third placement and the six hours that had apparently undone months of being someone's little sunshine.</p>\n<p>\"And if they don't like those parts?\"</p>\n<p>\"Then that hurts,\" Moana said. \"But if a placement depends on you never needing anything, that can <u class=\"word-tap\" data-word=\"isolate\">isolate</u> you even inside a family. You deserve to know whether there's room for your needs before you spend months holding them in.\"</p>\n<p>The placement already felt <u class=\"word-tap\" data-word=\"precarious\">precarious</u>. He had been <u class=\"word-tap\" data-word=\"resigned\">resigned</u> to treating the choice like two fixed futures: perform perfectly or lose the placement. Moana had made the forecast more complicated, which was somehow less hopeless. There were smaller choices: ask for one minute after a plan change; mention the flooded road; say the doorbell was too much. Each choice was <u class=\"word-tap\" data-word=\"contingent\">contingent</u> on how safe the moment felt. The all-or-nothing forecast had been <u class=\"word-tap\" data-word=\"misleading\">misleading</u>.</p>\n<p>\"I don't know how to tell when it's safe,\" he said.</p>\n<p>\"You might not,\" Moana said. \"We can test small things. And if you choose to mask sometimes, that's still a choice you get to make. I just want you to have more than one option.\"</p>\n<p>Rawiri didn't sleep well that night. But for the first time in weeks, when he lay awake, he wasn't trying to solve the whole placement at once. He was just lying there, watching the ceiling, letting the weather in his own chest be whatever it actually was.</p>",
+    "vocabMatch": [
+      {
+        "word": "contingent",
+        "definition": "Dependent on something else happening first.",
+        "example": "Whether they went to the beach was contingent on the weather clearing up."
+      },
+      {
+        "word": "resigned",
+        "definition": "Having accepted something unwelcome as unavoidable.",
+        "example": "He sounded resigned when he said the trip was probably cancelled."
+      },
+      {
+        "word": "isolate",
+        "definition": "To separate someone or something from others.",
+        "example": "Moving further away would isolate him from his siblings even more."
+      },
+      {
+        "word": "authentic",
+        "definition": "Real and genuine; true to who someone actually is.",
+        "example": "She wanted a friendship that felt authentic, not just polite."
+      },
+      {
+        "word": "misleading",
+        "definition": "Giving the wrong idea or impression, even without a direct lie.",
+        "example": "The cheerful photo was misleading — it didn't show how hard that day actually was."
+      },
+      {
+        "word": "precarious",
+        "definition": "Not safe or stable; likely to change or fail suddenly.",
+        "example": "His sense of belonging there still felt precarious."
+      }
+    ],
+    "questions": [
+      {
+        "text": "Moana says masking can be useful and protective, but worries about Rawiri having to do it every minute. What distinction is she making?",
+        "options": [
+          "A strategy can protect him and still become costly when he needs it constantly",
+          "Any masking is harmful because it prevents other people from seeing his real self",
+          "Masking is useful only until the family agrees to make the placement permanent",
+          "He should stop controlling his reactions so the family sees every difficulty"
+        ]
+      },
+      {
+        "text": "Moana says an 'authentic picture' does not mean every thought and reaction must be visible. What does she mean?",
+        "options": [
+          "He needs to explain every private feeling so the family has the complete picture",
+          "He should stop using coping strategies because they make his behaviour less authentic",
+          "Important needs can be known without every thought or reaction becoming public",
+          "The family only needs to know what makes Rawiri easiest to live with"
+        ]
+      },
+      {
+        "text": "Moana admits she doesn't have a script for Rawiri and says 'I wish I did.' What does this honesty do for their relationship, do you think?",
+        "options": [
+          "It makes her seem uncertain, which gives Rawiri more reason to doubt her advice",
+          "It shows she expects Rawiri to solve the problem by himself from now on",
+          "It reassures him that there is a correct answer even if she cannot explain it",
+          "It may build trust because she is honest about not having a guaranteed solution"
+        ]
+      },
+      {
+        "text": "If you were Rawiri before the next visit, which approach would you be most likely to try?",
+        "options": [
+          "Choose one small need or preference to let the family know and see how they respond",
+          "Force yourself to show every reaction so they see everything immediately",
+          "Keep every need hidden because masking is the only safe option",
+          "Ask Moana to help communicate something that feels hard to say directly"
+        ]
+      },
+      {
+        "text": "Moana says she wants Rawiri to have 'more than one option.' What would that look like?",
+        "options": [
+          "He should avoid masking whenever possible so other people always know what he feels",
+          "He can choose privacy or masking and also have ways to communicate important needs",
+          "He should wait until he is overwhelmed before showing that something is difficult",
+          "He should let adults decide which parts of himself are safe to show"
+        ]
+      }
+    ]
+  },
+  {
+    "num": 7,
+    "title": "Squall",
+    "text": "<p>It happened on the third visit, on a Wednesday, which nobody had planned for anything difficult.</p>\n<p>They were at the Solomonas' for dinner — a small, ordinary thing, meant to be low-key. Rawiri had eaten there twice before without incident. He knew the kitchen now, knew where Tiko slept, knew the four-note doorbell wasn't a threat. He had let his guard down exactly as much as he'd calculated was safe.</p>\n<p>Then Meleana, seven and unaware of any of it, reached over without warning and grabbed his notebook off the table to look at the drawings she assumed were inside.</p>\n<p>It wasn't even drawings. It was months of careful, private tracking — the one place Rawiri wrote without editing himself for other people. She flipped it open before he could stop her, and there, on the page he'd written the night after the first visit, in handwriting he hadn't meant anyone to see, were the words he'd crossed out and then — three chapters later — the words he hadn't.</p>\n<p><em>I don't think they'd want me if they knew how much work this is. I don't think anyone does. I'm so tired of checking the weather in every room I walk into.</em></p>\n<p>\"What's this bit mean?\" Meleana asked, entirely innocent, entirely unprepared for what she'd just done.</p>\n<p>Something in Rawiri came apart all at once, the way a held-together sky finally lets go — not a slow unravelling this time but a full, sudden <u class=\"word-tap\" data-word=\"spiralling\">spiralling</u> collapse, months of pressure releasing in a single <u class=\"word-tap\" data-word=\"involuntary\">involuntary</u> rush. He grabbed the notebook back too hard, voice cracking out loud and sharp — \"Don't touch that, that's not yours, give it back, GIVE IT BACK\" — and then he was shaking, and the room had gone very quiet, and Tiko was barking at the sudden noise, and Rawiri had his hands over his ears and his whole body was folding in on itself under the kitchen table, and every carefully planned sentence he'd ever prepared for this family was gone, burned off completely, and what was left wasn't a truer version of Rawiri than the quiet boy from lunch. It was Rawiri <u class=\"word-tap\" data-word=\"overwhelmed\">overwhelmed</u>, with no spare capacity left to manage his voice, the noise, or anyone else's expectations. His breathing was <u class=\"word-tap\" data-word=\"raw\">raw</u>; everything he had worked so hard to contain was suddenly visible in front of exactly the people whose good opinion he'd been protecting.</p>\n<p>He didn't remember most of the next few minutes clearly. He remembered Pati's voice, low, saying something to Meleana, taking her gently out of the room. He remembered Aroha had <u class=\"word-tap\" data-word=\"flinched\">flinched</u> at the sudden shout, then deliberately not touched him or tried to pull him out from under the table, just crouched a little distance away and said nothing at all.</p>\n<p>When it finally passed — when his breathing slowed and the kitchen came back into focus, tile by tile — he felt completely <u class=\"word-tap\" data-word=\"mortified\">mortified</u>, the embarrassment so total it was almost its own kind of storm.</p>\n<p>He had done the one thing he had planned, for three visits, never to do.</p>\n<p>He didn't look up. He didn't need to. He already knew, with total, exhausted certainty, exactly how this was going to end.</p>",
+    "vocabMatch": [
+      {
+        "word": "involuntary",
+        "definition": "Happening without you choosing or controlling it.",
+        "example": "His hands made an involuntary flinch at the loud bang."
+      },
+      {
+        "word": "spiralling",
+        "definition": "Getting worse quickly, in a way that feels hard to stop.",
+        "example": "Her worry kept spiralling the longer she waited for news."
+      },
+      {
+        "word": "mortified",
+        "definition": "Feeling extremely embarrassed or ashamed.",
+        "example": "He was mortified when his phone rang loudly during the silence."
+      },
+      {
+        "word": "raw",
+        "definition": "Very open and unprotected; not softened or hidden.",
+        "example": "Her voice sounded raw and shaky after she finally said it out loud."
+      },
+      {
+        "word": "flinched",
+        "definition": "Made a small, sudden movement in reaction to something painful or startling.",
+        "example": "She flinched when the door slammed unexpectedly."
+      },
+      {
+        "word": "overwhelmed",
+        "definition": "Affected so strongly by something that you cannot cope with it easily.",
+        "example": "He felt overwhelmed by all the noise and questions at once."
+      }
+    ],
+    "questions": [
+      {
+        "text": "What actually triggers Rawiri's collapse — not just on the surface, but underneath?",
+        "options": [
+          "Meleana opening the notebook is the whole cause; nothing before it matters",
+          "He becomes overwhelmed mainly because the dinner and barking are unusually noisy",
+          "The private note embarrasses him, but the earlier weeks have little effect",
+          "The notebook is the trigger, while accumulated pressure makes the reaction much bigger"
+        ]
+      },
+      {
+        "text": "Aroha crouches near him but doesn't touch him or try to pull him out from under the table. What does that choice suggest about how she's reading the situation?",
+        "options": [
+          "She reads his behaviour as overload and gives him space rather than adding demands",
+          "She thinks touching him would make him angry, so she avoids helping altogether",
+          "She is frightened by his shouting and does not want to get any closer",
+          "She expects him to calm himself down before she decides how to respond"
+        ]
+      },
+      {
+        "text": "Rawiri assumes he already knows exactly how this will end. What does that assumption tell us about what he expects once his needs and reactions become difficult to hide?",
+        "options": [
+          "He expects the family to forgive everything because they have already had good visits",
+          "He assumes they will ignore the incident because Meleana started the problem",
+          "Past placement experiences make visible difficulty feel like a likely path to rejection",
+          "He believes the family will ask Moana to explain what happened before deciding"
+        ]
+      },
+      {
+        "text": "If you were Meleana and realised what had happened after opening the notebook, what do you think you'd want to say or do afterward?",
+        "options": [
+          "Apologise and ask if he's okay",
+          "Say nothing and pretend it didn't happen",
+          "Tell her parents it was Rawiri's fault",
+          "Avoid him after that"
+        ]
+      },
+      {
+        "text": "Looking back at the last three chapters, what would you say actually caused this moment — the notebook being opened, or something bigger building underneath? What's the difference between those two explanations?",
+        "options": [
+          "The notebook caused the entire reaction because Rawiri had been coping well beforehand",
+          "The notebook triggered it, but weeks of accumulated effort made the reaction larger",
+          "The dinner itself caused the reaction because unexpected visits are always difficult",
+          "There is no useful cause to identify because overload happens without any pattern"
+        ]
+      }
+    ]
+  },
+  {
+    "num": 8,
+    "title": "After the Squall",
+    "text": "<p>Nobody sent him home early.</p>\n<p>That was the first thing Rawiri noticed, once the shaking had properly stopped and the kitchen had gone from chaos back to something like quiet. He was still under the table. Aroha was still crouched a small distance away, not pushing, just present, the way you'd wait out a squall you knew would pass if you gave it room.</p>\n<p>\"I'm sorry,\" Rawiri said eventually, voice raw and small. \"I ruined it.\"</p>\n<p>\"You didn't ruin anything,\" Aroha said. She didn't say it fast, the way people said reassuring things they didn't mean. She said it slowly, like she'd actually thought about it. \"You had a really hard moment. That's different.\"</p>\n<p>\"You're just saying that.\"</p>\n<p>\"I'm really not.\" She sat back properly now, giving him room but not leaving. \"Can I tell you something? Every visit so far, you've been lovely. Genuinely lovely. But I kept thinking — this is a kid who's working really hard at something, and I couldn't work out what. Pati thought so too. We talked about it in the car both times.\" She met his eyes, careful and <u class=\"word-tap\" data-word=\"unflinching\">unflinching</u>. \"This — \" she gestured at the kitchen, at the whole collapsed evening \" — doesn't make the earlier you fake. But it's the first time I've understood how much work some of those 'easy' moments were costing you. Now we have more information about what overload looks like and what you might need.\"</p>\n<p>Rawiri didn't know what to do with that. Nobody had ever treated a collapse as information instead of proof that he was a problem. It wasn't a more real version of him than the quiet boy at lunch; it was one part of him under too much load.</p>\n<p>Meleana appeared in the doorway holding a glass of water and, <u class=\"word-tap\" data-word=\"undeterred\">undeterred</u> by the awkwardness, marched it over without a word. She set it down next to him with the total, unbothered seriousness only a seven-year-old can manage, then sat down cross-legged nearby like this was simply what happened now. She didn't apologise for the notebook. She didn't need to; Rawiri could see, in the careful way she was watching him, that she understood, in her own seven-year-old way, that something had gone wrong and she wanted to help fix it without knowing exactly how.</p>\n<p>Pati came back in a few minutes later, sat on a kitchen chair rather than looming over him, and said, simply: \"That was a lot. For you and for us. We're not going anywhere tonight.\" Then, after a pause: \"Is there anything that would actually help right now? Not what you think we want to hear. What would help.\"</p>\n<p>Rawiri had never been asked that question by someone waiting for a true answer.</p>\n<p>By the time he felt <u class=\"word-tap\" data-word=\"composed\">composed</u> enough to answer, his breathing had <u class=\"word-tap\" data-word=\"steadied\">steadied</u>. \"Quiet,\" he said finally. \"Just — quiet, for a bit.\"</p>\n<p>They gave him quiet. Nobody filled the silence with reassurance he hadn't asked for. Nobody made him explain himself further than he wanted to. He sat at the kitchen table with a glass of water a seven-year-old had brought him, and the dog eventually came and put its head on his knee, and the storm outside — the actual weather, still moving through — pressed rain against the window in long waves, and slowly, slowly, something in Rawiri that had been clenched for three visits began, very carefully, to unclench. He felt strangely <u class=\"word-tap\" data-word=\"humbled\">humbled</u> by how ordinary they were allowing the aftermath to be.</p>\n<p>He still expected the worst; old certainties didn't dissolve in one evening. But something new had entered the forecast that he hadn't accounted for: a <u class=\"word-tap\" data-word=\"genuine\">genuine</u> possibility that people could learn more about what he needed and not immediately decide he was too much.</p>",
+    "vocabMatch": [
+      {
+        "word": "unflinching",
+        "definition": "Not showing fear or hesitation, even in a difficult moment.",
+        "example": "Her unflinching honesty was hard to hear but easy to trust."
+      },
+      {
+        "word": "steadied",
+        "definition": "Made calm and stable after being unsteady or upset.",
+        "example": "His breathing steadied once the room went quiet."
+      },
+      {
+        "word": "genuine",
+        "definition": "Real and sincere; not pretended.",
+        "example": "Her surprise was genuine — she really hadn't known about the party."
+      },
+      {
+        "word": "undeterred",
+        "definition": "Not discouraged or stopped by difficulty.",
+        "example": "Undeterred by the rain, they kept walking to school."
+      },
+      {
+        "word": "humbled",
+        "definition": "Made to feel less proud, often by realising something important.",
+        "example": "He felt humbled by how patient they had been with him."
+      },
+      {
+        "word": "composed",
+        "definition": "Calm and in control, especially under pressure.",
+        "example": "By the end of the evening he felt more composed again."
+      }
+    ],
+    "questions": [
+      {
+        "text": "Aroha says the earlier Rawiri was not fake, but the difficult evening gave her 'more information.' What does she mean?",
+        "options": [
+          "The calm visits were misleading, so the family should trust only his difficult moments",
+          "The overloaded moment shows a completely different side of him than they saw before",
+          "Both were him; the difficult moment revealed more about effort, overload and support needs",
+          "The family now understands him completely because they have seen him overwhelmed once"
+        ]
+      },
+      {
+        "text": "Pati asks 'what would actually help right now, not what you think we want to hear.' Why is that question different from most of the questions adults had asked Rawiri before?",
+        "options": [
+          "It asks him to explain why the evening went wrong before anyone offers support",
+          "It gives him a chance to prove he can respond calmly after being overwhelmed",
+          "It encourages him to choose the answer that will reassure the adults most quickly",
+          "It asks for information that could actually help, rather than the easiest answer for adults"
+        ]
+      },
+      {
+        "text": "Meleana brings him a glass of water without saying anything about the notebook. What does her small, wordless action suggest about her understanding of the situation?",
+        "options": [
+          "She seems to know something went wrong and offers care in a simple way",
+          "She assumes water will fix the whole situation, so no apology or discussion matters",
+          "She is copying what her parents told her to do without understanding anything",
+          "She wants Rawiri to notice her so the attention moves away from the notebook"
+        ]
+      },
+      {
+        "text": "If you were Rawiri sitting at that table afterward, and someone finally asked you what would actually help — what do you imagine you might have said, if not 'quiet'?",
+        "options": [
+          "Something practical, like a specific comfort item or activity",
+          "An honest explanation of what had been building up",
+          "A request to just be with someone, without talking",
+          "A request to leave and be alone completely"
+        ]
+      },
+      {
+        "text": "By the end of the chapter, has the Solomona family decided anything for certain about keeping Rawiri? What do we actually know at this point?",
+        "options": [
+          "They have decided to keep him because nobody sent him home after dinner",
+          "The decision is still unknown; we only know the incident did not end things immediately",
+          "They have decided against the placement but are avoiding telling him that night",
+          "They have postponed the decision because they need Rawiri to explain the incident first"
+        ]
+      }
+    ]
+  },
+  {
+    "num": 9,
+    "title": "Clearing",
+    "text": "<p>Moana didn't ask how the visit went when she picked him up. She'd already had a call from Aroha on the way over, apparently, because she just handed him a blanket for the car and said, \"Rough one. You don't have to talk about it yet.\"</p>\n<p>He didn't, for two days. He kept mostly to the common room window, notebook open, tracking a slow, textbook clearing system moving in from the west — the kind of forecast so simple and so certain it felt almost like a gift, after everything.</p>\n<p>On the third evening, unprompted, he asked Moana for paper. Not notebook paper. Letter paper.</p>\n<p>\"Who's it for?\" she asked, sliding a sheet across the table.</p>\n<p>\"Maya.\" He said the name carefully, like testing whether it still fit in his mouth. \"My sister. The one on the island.\"</p>\n<p>\"You've written to her before?\"</p>\n<p>\"No.\" He looked at the blank page for a long moment. \"I don't really know what to say.\"</p>\n<p>\"You don't have to know the whole letter before you start it,\" Moana said. \"Just start with something true and see where it goes.\"</p>\n<p>Rawiri wrote, crossed out, wrote again. He tried to be <u class=\"word-tap\" data-word=\"articulate\">articulate</u>, which took him most of an hour for half a page. He told Maya about Rangimārie House, about the cloud notebook, about Manaia, though he didn't use her whole story, just enough to say <em>I have a friend here who understands things without me having to explain them, which I didn't know was possible.</em> With a <u class=\"word-tap\" data-word=\"hesitant\">hesitant</u> pause, he told her about the Solomonas, about the visits, about the notebook and Meleana and the collapse under the table. He wrote around the hardest part twice before he let himself write it plainly: <em>I got overwhelmed in front of them. I thought that would be the end of it. It might still be. But they saw something I usually work hard to keep private, and then they asked what would help instead of deciding it meant I was too much.</em></p>\n<p>He didn't know if Maya would understand any of it. He didn't know, honestly, if she'd even remember him clearly — she'd been gone before he'd really had the chance to know her the way he was starting, now, to wish he had. Writing it down left him <u class=\"word-tap\" data-word=\"vulnerable\">vulnerable</u>, but it was strangely <u class=\"word-tap\" data-word=\"cathartic\">cathartic</u> too, the way naming a weather pattern made it feel less like something happening <em>to</em> you and more like something you could, at least, understand.</p>\n<p>Manaia read over his shoulder without asking, which he let her do. \"You told her about the notebook thing.\"</p>\n<p>\"Yeah.\"</p>\n<p>\"That's brave.\"</p>\n<p>\"It's just a letter.\"</p>\n<p>\"It's not just a letter.\" Manaia's own placements had never included anyone worth writing to, and they both knew it, though neither of them said so out loud. \"You chose what to tell her. On purpose. That's different from feeling like you have to hide everything.\" Rawiri stayed <u class=\"word-tap\" data-word=\"reflective\">reflective</u> for a long moment.</p>\n<p>With quiet <u class=\"word-tap\" data-word=\"resolve\">resolve</u>, Rawiri sealed the envelope before he could talk himself out of it and walked it to the postbox himself, in the last of the evening light, past a sky that had — for once, exactly as forecast — cleared to something calm and <u class=\"word-tap\" data-word=\"unclouded\">unclouded</u> from edge to edge.</p>\n<p>He didn't know yet what the Solomonas would decide. He didn't know what Maya would write back, or whether she would at all. But he had said a true thing on purpose, to someone who mattered, and let it leave his hands anyway.</p>\n<p>Maybe the skill wasn't never forecasting a room. Maybe it was letting the forecast guide him without letting it decide every move — and choosing, with people who seemed safer, which important things he was willing to let them know.</p>",
+    "vocabMatch": [
+      {
+        "word": "articulate",
+        "definition": "Able to express thoughts and feelings clearly.",
+        "example": "It took real effort to be articulate about something so hard to explain."
+      },
+      {
+        "word": "hesitant",
+        "definition": "Slow to act or speak because you are uncertain.",
+        "example": "He gave a hesitant answer, unsure how it would be received."
+      },
+      {
+        "word": "cathartic",
+        "definition": "Providing relief from strong or repressed emotions.",
+        "example": "Writing everything down felt cathartic after weeks of holding it in."
+      },
+      {
+        "word": "vulnerable",
+        "definition": "Open to being hurt; without your usual protection.",
+        "example": "Sharing the truth in the letter left him feeling vulnerable."
+      },
+      {
+        "word": "resolve",
+        "definition": "Firm determination to do something.",
+        "example": "She wrote the letter with quiet resolve, even though her hands were shaking."
+      },
+      {
+        "word": "reflective",
+        "definition": "Thinking carefully and deeply about something.",
+        "example": "He'd grown more reflective since the night at the Solomonas'."
+      }
+    ],
+    "questions": [
+      {
+        "text": "In his letter, Rawiri says the family saw something he normally keeps private and then asked what would help. What is he identifying as important?",
+        "options": [
+          "He thinks becoming overwhelmed showed the family a more authentic version of him",
+          "He believes the family stayed mainly because they felt sorry for him afterward",
+          "He sees the difficult dinner as proof that keeping anything private is a mistake",
+          "Their response showed that visible needs did not automatically lead to rejection"
+        ]
+      },
+      {
+        "text": "Manaia notices that Rawiri chose what to tell Maya instead of feeling he had to hide everything. What has changed?",
+        "options": [
+          "He has more choice about what stays private and what important experiences he shares",
+          "He has decided to tell people everything before they have a chance to misunderstand him",
+          "He no longer cares how people respond when he shares something difficult",
+          "He now believes privacy is useful only when a relationship feels unsafe"
+        ]
+      },
+      {
+        "text": "Rawiri doesn't know if Maya will even remember him clearly, but he sends the letter anyway. What does that decision show about him at this point in the story?",
+        "options": [
+          "He expects Maya to respond positively because they are siblings and she has to",
+          "He sends it because Moana has told him that writing is always better than talking",
+          "He is willing to share something meaningful even though he cannot control Maya's response",
+          "He has stopped worrying about rejection now that the Solomona visits are going better"
+        ]
+      },
+      {
+        "text": "If you were Rawiri, how much of the difficult dinner would you have chosen to include in the letter?",
+        "options": [
+          "Enough to explain what happened and how the family responded",
+          "Only the good parts",
+          "A brief mention without much detail",
+          "Wait until a later letter before sharing something that private"
+        ]
+      },
+      {
+        "text": "By the end of the chapter, Rawiri thinks a forecast can guide him without deciding every move. What does this suggest he's learning?",
+        "options": [
+          "Planning is a problem because it stops him from responding naturally in every situation",
+          "Protective strategies can help while he gains more choice about what trusted people know",
+          "He should trust his first impression of a room instead of planning what might happen",
+          "The safest approach is to reveal important needs immediately before he starts masking"
+        ]
+      }
+    ]
+  },
+  {
+    "num": 10,
+    "title": "Fair Weather",
+    "text": "<p>The reply came eleven days later, which Rawiri had counted, though he hadn't told anyone he was counting.</p>\n<p>Maya's handwriting was quick and slanted, like she'd written it in one sitting without stopping to second-guess herself. He read it twice on the back step before he let himself go inside.</p>\n<p><em>I remember you more than you probably think. You used to tell me the names of clouds like they were people you knew personally. I liked that about you. I still do, apparently, because reading your letter I could hear exactly how you'd say it.</em></p>\n<p><em>I had a moment like that too, where I couldn't keep everything contained in front of someone who mattered. I thought it was the end of everything. The important part wasn't that the collapse was the \"real me.\" It was what happened after: someone stayed, listened, and learned something about what I needed. I'm not saying it always works out. I'm saying a hard moment doesn't automatically tell you how the whole relationship will end.</em></p>\n<p><em>We're all just finding our own version of the same thing, wherever we've landed. I hope yours is landing somewhere kind. Write again. — M</em></p>\n<p>Rawiri sat with the letter for a long time before he went inside.</p>\n<p>The call from the Solomonas came the following week. Moana took it in the office and came to find him afterward with an expression he couldn't immediately read — not the bright, easy smile he'd learned to brace against, something quieter and more careful than that.</p>\n<p>\"They want to go ahead,\" she said. \"Officially. A proper placement, not just visits.\"</p>\n<p>Rawiri felt his whole body go very still, the way it did before he let himself believe something. \"Because I was easy?\"</p>\n<p>\"No.\" Moana sat down across from him. \"Aroha specifically said — and I wrote this down because I thought you should hear it exactly — 'the night things got hard gave us information we didn't have before. We learned what overload can look like for him, that quiet helps, and that he can tell us what he needs when we give him room. We don't need him to be easy all the time. We need enough of the picture to know whether we can show up properly.'\"</p>\n<p>Rawiri didn't cry, quite. But something in his chest, some old, held pressure system that had been sitting stuck between two fronts for eleven months, finally, finally, moved.</p>\n<p>Weeks later, on a clear, <u class=\"word-tap\" data-word=\"unclouded\">unclouded</u> Saturday morning, Rawiri sat on the back step outside what was now his <u class=\"word-tap\" data-word=\"settled\">settled</u> room at the Solomonas' place. Meleana sat beside him, uninvited and entirely welcome, asking what kind of cloud that one was, pointing at something high and thin and drifting.</p>\n<p>\"Cirrus,\" he said. \"Means fine weather's coming. Usually.\"</p>\n<p>\"Usually?\"</p>\n<p>\"Nothing's ever completely certain.\" He said it easily, without the old flinch that used to come with admitting uncertainty out loud. \"But it's a good sign.\"</p>\n<p>He thought about the version of himself who had planned every sentence for that first visit, who had swallowed a warning about flooded roads to seem less like a lot. That version wasn't false; it had been trying, <u class=\"word-tap\" data-word=\"steadfast\">steadfast</u>ly, to keep him safe with the tools it knew. He still rehearsed answers sometimes. On crowded days he still chose not to explain every reaction. Those strategies could still help.</p>\n<p>What had changed was that he didn't need them every minute here. When breakfast moved twenty minutes earlier, he could say, \"Give me a minute,\" and Pati said, \"Yep.\" When he wanted to talk about clouds for ten minutes, Meleana listened for six and wandered off, and nobody treated either thing as a problem. The relief was <u class=\"word-tap\" data-word=\"genuine\">genuine</u>: privacy could be a choice instead of a rule.</p>\n<p>He didn't know whether that safety would always feel this clear. He had a quiet <u class=\"word-tap\" data-word=\"resolve\">resolve</u> to keep testing it in small ways. Maybe that was how something <u class=\"word-tap\" data-word=\"enduring\">enduring</u> was built — not by showing every part of yourself all the time, but by having enough room for needs, interests, limits and ordinary privacy to coexist.</p>\n<p>He wrote a line in his notebook. This time it wasn't about clouds at all, though it used their language anyway, because that was still how he understood things best.</p>\n<p><em>Fair weather doesn't mean no weather. It just means you can see clearly, for now, and that's enough to be outside in.</em></p>\n<p>He didn't cross it out. He closed the notebook, and went in for breakfast, and let the day be whatever it turned out to be.</p>",
+    "vocabMatch": [
+      {
+        "word": "unclouded",
+        "definition": "Clear; without anything blocking the view or the truth.",
+        "example": "The sky was unclouded for the first time in a week."
+      },
+      {
+        "word": "steadfast",
+        "definition": "Firm and unchanging, especially in loyalty or purpose.",
+        "example": "She stayed steadfast in her decision even when it got difficult."
+      },
+      {
+        "word": "settled",
+        "definition": "Resolved, calm, or established after a period of uncertainty.",
+        "example": "After months of moving around, things finally felt settled."
+      },
+      {
+        "word": "enduring",
+        "definition": "Lasting for a long time; continuing without breaking.",
+        "example": "They built an enduring friendship over many years."
+      },
+      {
+        "word": "genuine",
+        "definition": "Real and sincere; not pretended.",
+        "example": "His relief was genuine when he heard the news."
+      },
+      {
+        "word": "resolve",
+        "definition": "Firm determination to do something.",
+        "example": "He read the letter twice, then answered with quiet resolve."
+      }
+    ],
+    "questions": [
+      {
+        "text": "Maya says the important part of her own difficult moment was not that the collapse was her 'real self,' but what happened afterward. What is she offering Rawiri?",
+        "options": [
+          "She is warning him that difficult moments are less risky if he masks more carefully afterward",
+          "She is saying that a collapse gives other people the most accurate version of who he is",
+          "She offers evidence that a hard moment can be survived without automatically ending a relationship",
+          "She wants him to focus on preventing another collapse rather than thinking about what followed"
+        ]
+      },
+      {
+        "text": "Aroha says the hard evening gave the family information about overload, quiet and what helps. Why does that matter for the placement?",
+        "options": [
+          "It lets them decide with better information about Rawiri's needs and what support involves",
+          "It proves the earlier calm visits were inaccurate and should not influence the placement decision",
+          "It means they now know exactly how every future difficult moment will unfold",
+          "It gives them a reason to continue because handling crises is the main goal of fostering"
+        ]
+      },
+      {
+        "text": "By the final chapter, Rawiri still rehearses answers or keeps some reactions private at times. What does this tell us about the change he has made?",
+        "options": [
+          "He still masks sometimes because the placement has not actually changed his sense of safety",
+          "He has learned that successful masking is the best way to preserve privacy in a family",
+          "He now avoids coping strategies unless an adult tells him that using one is acceptable",
+          "The strategies still help; the change is having more choice about when he needs them"
+        ]
+      },
+      {
+        "text": "If you were Rawiri at the start of the story and could send yourself one piece of advice from the ending, what would you choose?",
+        "options": [
+          "Never mask again, because using a protective strategy means people cannot know you properly",
+          "Try small, safe ways to let important needs be known without having to reveal everything",
+          "Keep difficult needs private until the placement is permanent and there is no risk",
+          "Avoid getting attached until other people can guarantee that the relationship will last"
+        ]
+      },
+      {
+        "text": "The story ends with the line 'fair weather doesn't mean no weather.' What does that suggest about Rawiri's future?",
+        "options": [
+          "Life with the Solomonas will be easier because the hardest part of his story is finished",
+          "He no longer needs to prepare for hard days because the family now understands him completely",
+          "Hard days can still happen, but he has more room to ask for support",
+          "The weather metaphor means uncertainty has stopped bothering him now that the placement is settled"
+        ]
+      }
+    ]
+  }
+];
+
+// ── STATE + PERSISTENCE ────────────────────────────────────────────
+const SAVE_KEY='tide_sequel_1';
+function loadState(){
+  try{const s=localStorage.getItem(SAVE_KEY);if(s)return JSON.parse(s);}catch(e){}
+  return null;
+}
+function saveState(){
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify(state));}catch(e){}
+}
+
+function normaliseProgress(){
+  if(!state||!state.chapters)return;
+  state.chapters.forEach((ch)=>{
+    // All chapters remain available at all times. Completion is tracked for the summary only.
+    ch.unlocked=true;
+    if(ch.complete===undefined)ch.complete=false;
+    if(ch.answers===undefined)ch.answers={};
+    if(ch.vocab===undefined)ch.vocab=[];
+    if(ch.wordsTapped===undefined)ch.wordsTapped=[];
+    if(ch.matchDone===undefined)ch.matchDone=false;
+  });
+}
+
+function enforceChapterLocks(){
+  // Retained as a compatibility hook for older saved progress, but no chapters are locked.
+  if(!state||!state.chapters)return;
+  state.chapters.forEach(ch=>{ch.unlocked=true;});
+}
+
+let state;
+const saved=loadState();
+if(saved&&saved.chapters&&saved.chapters.length===CHAPTERS.length){
+  state=saved;
+  normaliseProgress();
+}else{
+  state={
+    currentChapter:0,
+    chapters:CHAPTERS.map(()=>({unlocked:true,complete:false,answers:{},vocab:[],wordsTapped:[],matchDone:false})),
+    currentPopupWord:null
+  };
+}
+
+// ── READ ALOUD ─────────────────────────────────────────────────────
+let synth=window.speechSynthesis;
+let raState='stopped'; // stopped | playing | paused
+let raChunkIdx=0;
+let raChunks=[];
+
+function buildChunks(text){
+  return text.match(/[^.!?]+[.!?]+/g)||[text];
+}
+
+function updateRaButtons(){
+  const play=document.getElementById('ra-play');
+  const pause=document.getElementById('ra-pause');
+  const stop=document.getElementById('ra-stop');
+  if(!play)return;
+  play.disabled=raState==='playing';
+  pause.disabled=raState==='stopped';
+  stop.disabled=raState==='stopped';
+  play.textContent=raState==='paused'?'▶ Resume':'▶ Play';
+  play.classList.toggle('active-play',raState==='playing');
+  pause.classList.toggle('active-pause',raState==='paused');
+}
+
+function raPlay(){
+  if(raState==='playing')return;
+  const storyEl=document.querySelector('.story-text');
+  if(!storyEl)return;
+  if(raState==='paused'&&raChunks.length){
+    speakChunksFrom(raChunkIdx);
+  } else {
+    synth.cancel();
+    raChunks=buildChunks(storyEl.innerText);
+    raChunkIdx=0;
+    speakChunksFrom(0);
+  }
+  raState='playing';
+  updateRaButtons();
+}
+
+function speakChunksFrom(idx){
+  if(idx>=raChunks.length){raStop();return;}
+  raChunkIdx=idx;
+  const sp=document.getElementById('ra-speed');
+  const u=new SpeechSynthesisUtterance(raChunks[idx]);
+  u.rate=sp?parseFloat(sp.value):0.9;
+  u.onend=()=>{
+    if(raState==='playing')speakChunksFrom(idx+1);
+  };
+  synth.speak(u);
+}
+
+function raPause(){
+  if(raState!=='playing')return;
+  synth.cancel();
+  raState='paused';
+  updateRaButtons();
+}
+
+function raStop(){
+  synth.cancel();
+  raState='stopped';
+  raChunkIdx=0;
+  raChunks=[];
+  updateRaButtons();
+}
+
+// ── POPUP + WORD CLICKS ────────────────────────────────────────────
+function makeTextClickable(container){
+  const walker=document.createTreeWalker(container,NodeFilter.SHOW_TEXT,{
+    acceptNode(node){
+      const p=node.parentElement;
+      if(p.classList.contains('word-tap')||p.tagName==='BUTTON'||p.tagName==='SCRIPT'||p.tagName==='STYLE')
+        return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const toReplace=[];
+  let node;
+  while(node=walker.nextNode()){
+    if(node.textContent.trim())toReplace.push(node);
+  }
+  toReplace.forEach(textNode=>{
+    const frag=document.createDocumentFragment();
+    const parts=textNode.textContent.split(/(\b\w+\b)/);
+    parts.forEach(part=>{
+      if(/^\w+$/.test(part)&&part.length>2){
+        const span=document.createElement('span');
+        span.className='word-any';
+        span.textContent=part;
+        span.addEventListener('click',e=>{e.stopPropagation();showWordPopup(part,null,span);});
+        frag.appendChild(span);
+      } else {
+        frag.appendChild(document.createTextNode(part));
+      }
+    });
+    textNode.parentNode.replaceChild(frag,textNode);
+  });
+}
+
+function showWordPopup(word,def,el){
+  const w=word.toLowerCase();
+  const defText=def||DEFS[w]||null;
+  document.getElementById('popup-word').textContent=word;
+  const defEl=document.getElementById('popup-def');
+  if(defText){defEl.textContent=defText;defEl.classList.remove('no-def');}
+  else{defEl.textContent='No definition stored — add to your vocab list anyway?';defEl.classList.add('no-def');}
+  state.currentPopupWord=word;
+  const chS=state.chapters[state.currentChapter];
+  if(!chS.wordsTapped.includes(word))chS.wordsTapped.push(word);
+  saveState();
+  const addBtn=document.getElementById('popup-add-btn');
+  const already=chS.vocab.includes(word);
+  addBtn.textContent=already?'Already in list':'Add to vocab list';
+  addBtn.disabled=already;
+  document.getElementById('word-popup').classList.add('show');
+  if(synth){synth.cancel();const u=new SpeechSynthesisUtterance(word);u.rate=0.85;synth.speak(u);}
+}
+function closePopup(){document.getElementById('word-popup').classList.remove('show');state.currentPopupWord=null;}
+function addCurrentWordToVocab(){
+  const word=state.currentPopupWord;if(!word)return;
+  const chS=state.chapters[state.currentChapter];
+  if(!chS.vocab.includes(word)){
+    chS.vocab.push(word);saveState();renderVocab();
+    const addBtn=document.getElementById('popup-add-btn');
+    addBtn.textContent='Added!';addBtn.disabled=true;
+    document.querySelectorAll('.word-tap,.word-any').forEach(el=>{
+      if(el.textContent.toLowerCase()===word.toLowerCase())el.classList.add('in-vocab');
+    });
+  }
+}
+
+// ── NAV ────────────────────────────────────────────────────────────
+function renderNav(){
+  document.getElementById('chapter-nav').innerHTML=CHAPTERS.map((ch,i)=>{
+    const s=state.chapters[i];
+    let cls='chapter-pill unlocked';
+    if(s.complete)cls='chapter-pill complete';
+    if(i===state.currentChapter)cls='chapter-pill current';
+    return`<div class="${cls}" onclick="goToChapter(${i})" title="Ch ${i+1}: ${ch.title}">${i+1}</div>`;
+  }).join('');
+}
+function goToChapter(i){
+  if(i<0||i>=CHAPTERS.length)return;
+  raStop();
+  state.currentChapter=i;saveState();
+  renderChapter();renderNav();window.scrollTo(0,0);
+}
+
+// ── CHAPTER RENDER ─────────────────────────────────────────────────
+function slugify(str){return str.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');}
+function todayDDMMYYYY(){
+  const d=new Date();
+  const dd=String(d.getDate()).padStart(2,'0');
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  const yyyy=d.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
+}
+
+function renderChapter(){
+  const idx=state.currentChapter;const ch=CHAPTERS[idx];const s=state.chapters[idx];
+  document.getElementById('chapter-container').innerHTML=`
+<div class="chapter-eyebrow">Chapter ${ch.num} of ${CHAPTERS.length}</div>
+<h1 class="chapter-title">${ch.title}</h1>
+<div class="chapter-divider"><div class="chapter-divider-line"></div><div class="chapter-divider-dot"></div><div class="chapter-divider-line"></div></div>
+<div class="read-aloud-bar">
+  <span>Listen:</span>
+  <button class="btn-ra" id="ra-play" onclick="raPlay()" title="Play">▶ Play</button>
+  <button class="btn-ra" id="ra-pause" onclick="raPause()" title="Pause" disabled>⏸ Pause</button>
+  <button class="btn-ra" id="ra-stop" onclick="raStop()" title="Stop" disabled>⏹ Stop</button>
+  <select class="speed-select" id="ra-speed"><option value="0.7">Slow</option><option value="0.9" selected>Normal</option><option value="1.1">Fast</option></select>
+  <span style="font-size:0.7rem;color:var(--ink-light)">tap any word to hear it</span>
+</div>
+<div class="story-text" id="story-text">${ch.text}</div>
+<div class="section-break">· · ·</div>
+<div class="questions-section">
+  <div class="questions-header">
+    <div class="questions-title">Think about it</div>
+    <div class="questions-meta">5 questions · all chapters stay open</div>
+  </div>
+  <p class="questions-intro">Pick the option that fits best, or choose "Other" to write your own idea.</p>
+  ${ch.questions.map((q,qi)=>renderQuestion(q,qi,idx)).join('')}
+</div>
+<div class="vocab-section">
+  <div class="vocab-title">Your vocab list</div>
+  <p class="vocab-subtitle">Words you've tapped and saved this chapter. Remove any you already know.</p>
+  <div class="vocab-list" id="vocab-list">${renderVocabHTML(s.vocab)}</div>
+</div>
+<div class="match-section">
+  <div class="match-title">Match it up</div>
+  <p class="match-subtitle">For each word, choose the matching definition and the matching example sentence.</p>
+  <div id="match-container">${renderMatchHTML(ch,idx)}</div>
+</div>
+<div class="session-block">
+  <div class="session-title">Session summary</div>
+  <p class="session-subtitle">Everything covered so far, across every chapter.</p>
+  <div id="session-stats">${renderSessionStatsHTML()}</div>
+  <div class="download-row">
+    <button class="btn-download secondary" onclick="showSummary()">📄 View / save session summary</button>
+  </div>
+  <div class="download-note">The summary opens as a page and uses the same <strong>Save as PDF</strong> workflow as <em>The Tide Comes In</em>.</div>
+</div>
+<div class="complete-banner ${s.complete?'show':''}" id="complete-banner">
+  <p>Chapter ${ch.num} complete ✓</p>
+  ${idx<CHAPTERS.length-1?`<button class="next-btn" onclick="goToChapter(${idx+1})">Next chapter →</button>`:`<p style="font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--ink-mid);margin-top:0.6rem;">You've finished Fair Weather. Well done.</p>`}
+</div>
+`;
+
+  const storyEl=document.getElementById('story-text');
+  makeTextClickable(storyEl);
+  document.querySelectorAll('.word-tap').forEach(el=>{
+    const w=el.dataset.word;
+    el.addEventListener('click',e=>{e.stopPropagation();showWordPopup(w,DEFS[w]||null,el);});
+    if(s.vocab.includes(w))el.classList.add('in-vocab');
+  });
+  const allVocab=[...new Set(state.chapters.flatMap(c=>c.vocab))];
+  document.querySelectorAll('.word-any').forEach(el=>{
+    if(allVocab.includes(el.textContent)||allVocab.includes(el.textContent.toLowerCase()))el.classList.add('in-vocab');
+  });
+  raState='stopped';updateRaButtons();
+  checkAllAnswered(idx,false);
+}
+
+function renderQuestion(q,qi,chIdx){
+  const ans=state.chapters[chIdx].answers[qi]||{};
+  const isOther=ans.mc==='other';
+  const optsHtml=q.options.map((opt,oi)=>`<label class="mc-option ${ans.mc===oi?'selected':''}" onclick="selectMC(${chIdx},${qi},${oi},this)"><input type="radio" name="q${chIdx}_${qi}" ${ans.mc===oi?'checked':''}> ${opt}</label>`).join('');
+  const otherHtml=`<label class="mc-option ${isOther?'selected':''}" onclick="selectMC(${chIdx},${qi},'other',this)"><input type="radio" name="q${chIdx}_${qi}" ${isOther?'checked':''}> Other — I have a different idea</label>`;
+  const answered=ans.mc!==undefined&&(ans.mc!=='other'||(ans.otherText&&ans.otherText.trim().length>0));
+  return`<div class="question-block" id="qblock-${qi}">
+  <div class="question-num">Question ${qi+1}</div>
+  <div class="question-text">${q.text}</div>
+  <div class="mc-options">${optsHtml}${otherHtml}</div>
+  <div class="mc-other-wrap ${isOther?'show':''}" id="other-wrap-${qi}">
+    <textarea class="mc-other-input" id="other-input-${qi}" placeholder="Write your own idea here..." onblur="saveOtherText(${chIdx},${qi},this.value)">${ans.otherText||''}</textarea>
+  </div>
+  <div class="q-status ${answered?'show':''}" id="qstatus-${qi}">✓ answered</div>
+</div>`;
+}
+
+function renderVocabHTML(vocab){
+  if(!vocab||!vocab.length)return'<span class="vocab-empty">No words saved yet — tap any word while reading to add it.</span>';
+  return vocab.map(w=>`<div class="vocab-chip">${w}<button onclick="removeVocab('${w}')" title="I know this word">×</button></div>`).join('');
+}
+function renderVocab(){
+  const l=document.getElementById('vocab-list');
+  if(l)l.innerHTML=renderVocabHTML(state.chapters[state.currentChapter].vocab);
+}
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function renderMatchHTML(ch,chIdx){
+  const defsShuffled=shuffle(ch.vocabMatch.map(v=>v.definition));
+  const exsShuffled=shuffle(ch.vocabMatch.map(v=>v.example));
+  window._matchOptions=window._matchOptions||{};
+  window._matchOptions[chIdx]={defs:defsShuffled,exs:exsShuffled};
+  const rows=ch.vocabMatch.map((v,vi)=>{
+    const defOpts=defsShuffled.map((d,di)=>`<option value="${di}">${d}</option>`).join('');
+    const exOpts=exsShuffled.map((ex,ei)=>`<option value="${ei}">${ex}</option>`).join('');
+    return`<div class="match-row" id="match-row-${vi}">
+  <div class="match-word">${v.word}</div>
+  <div class="match-field">
+    <label class="match-label">Definition</label>
+    <select class="match-select" id="match-def-${vi}"><option value="">— choose a definition —</option>${defOpts}</select>
+  </div>
+  <div class="match-field">
+    <label class="match-label">Example</label>
+    <select class="match-select" id="match-ex-${vi}"><option value="">— choose an example —</option>${exOpts}</select>
+  </div>
+</div>`;
+  }).join('');
+  return `${rows}<button class="match-check-btn" onclick="checkMatches(${chIdx})">Check my answers</button><div class="match-feedback" id="match-feedback"></div>`;
+}
+
+function checkMatches(chIdx){
+  const ch=CHAPTERS[chIdx];
+  const opts=window._matchOptions[chIdx];
+  let correctCount=0;
+  ch.vocabMatch.forEach((v,vi)=>{
+    const defSel=document.getElementById(`match-def-${vi}`);
+    const exSel=document.getElementById(`match-ex-${vi}`);
+    const defOk=defSel.value!==''&&opts.defs[parseInt(defSel.value)]===v.definition;
+    const exOk=exSel.value!==''&&opts.exs[parseInt(exSel.value)]===v.example;
+    defSel.classList.remove('correct','retry');
+    exSel.classList.remove('correct','retry');
+    defSel.classList.add(defOk?'correct':'retry');
+    exSel.classList.add(exOk?'correct':'retry');
+    if(defOk&&exOk)correctCount++;
+  });
+  const fb=document.getElementById('match-feedback');
+  if(correctCount===ch.vocabMatch.length){
+    fb.textContent=`All matched ✓ (${correctCount} of ${ch.vocabMatch.length})`;
+    fb.style.color='var(--success)';
+    state.chapters[chIdx].matchDone=true;saveState();
+  } else {
+    fb.textContent=`${correctCount} of ${ch.vocabMatch.length} matched so far — green means correct, gold means try that one again.`;
+    fb.style.color='var(--ink-mid)';
+  }
+}
+
+// ── ANSWERS ────────────────────────────────────────────────────────
+function selectMC(chIdx,qi,oi,labelEl){
+  state.chapters[chIdx].answers[qi]=state.chapters[chIdx].answers[qi]||{};
+  state.chapters[chIdx].answers[qi].mc=oi;
+  const block=document.getElementById(`qblock-${qi}`);
+  if(block)block.querySelectorAll('.mc-option').forEach(l=>l.classList.remove('selected'));
+  labelEl.classList.add('selected');
+  const otherWrap=document.getElementById(`other-wrap-${qi}`);
+  if(oi==='other'){
+    otherWrap.classList.add('show');
+    const ta=document.getElementById(`other-input-${qi}`);
+    if(ta)ta.focus();
+  } else {
+    otherWrap.classList.remove('show');
+  }
+  const ans=state.chapters[chIdx].answers[qi];
+  const answered=oi!=='other'||(ans.otherText&&ans.otherText.trim().length>0);
+  const st=document.getElementById(`qstatus-${qi}`);if(st)st.classList.toggle('show',answered);
+  saveState();checkAllAnswered(chIdx,true);
+}
+function saveOtherText(chIdx,qi,val){
+  state.chapters[chIdx].answers[qi]=state.chapters[chIdx].answers[qi]||{};
+  state.chapters[chIdx].answers[qi].otherText=val;
+  const st=document.getElementById(`qstatus-${qi}`);
+  if(st)st.classList.toggle('show',val.trim().length>0);
+  saveState();checkAllAnswered(chIdx,true);
+}
+function checkAllAnswered(chIdx,showBanner){
+  const ch=CHAPTERS[chIdx];const s=state.chapters[chIdx];
+  const done=ch.questions.every((_,qi)=>{
+    const a=s.answers[qi]||{};
+    if(a.mc===undefined)return false;
+    if(a.mc==='other')return !!(a.otherText&&a.otherText.trim().length>0);
+    return true;
+  });
+  if(done&&!s.complete){
+    s.complete=true;saveState();
+    if(showBanner){renderChapter();}
+    renderNav();
+  }
+}
+function removeVocab(word){
+  state.chapters[state.currentChapter].vocab=state.chapters[state.currentChapter].vocab.filter(w=>w!==word);
+  saveState();renderVocab();
+  document.querySelectorAll('.word-tap,.word-any').forEach(el=>{
+    if(el.textContent===word||el.textContent.toLowerCase()===word.toLowerCase())el.classList.remove('in-vocab');
+  });
+}
+
+// ── SESSION STATS ───────────────────────────────────────────────────
+function renderSessionStatsHTML(){
+  const completed=state.chapters.filter(s=>s.complete).length;
+  const allTapped=[...new Set(state.chapters.flatMap(s=>s.wordsTapped).map(w=>w.toLowerCase()))];
+  const allVocab=[...new Set(state.chapters.flatMap(s=>s.vocab))];
+  const matchesDone=state.chapters.filter(s=>s.matchDone).length;
+  return `<div class="session-stats">
+  <div class="session-stat-row"><span>Chapters completed</span><span class="session-stat-val">${completed} of ${CHAPTERS.length}</span></div>
+  <div class="session-stat-row"><span>Unique words tapped</span><span class="session-stat-val">${allTapped.length}</span></div>
+  <div class="session-stat-row"><span>Words saved to vocab list</span><span class="session-stat-val">${allVocab.length}</span></div>
+  <div class="session-stat-row"><span>Matching sections fully correct</span><span class="session-stat-val">${matchesDone} of ${CHAPTERS.length}</span></div>
+</div>`;
+}
+
+function printSummary(){
+  window.onafterprint=function(){
+    const prompt=document.getElementById('after-print-prompt');
+    if(prompt){prompt.style.display='block';}
+  };
+  window.print();
+}
+
+// ── SUMMARY SCREEN (full page view) ──────────────────────────────────
+function showSummary(){
+  if(typeof synth!=='undefined'&&synth)synth.cancel();
+  raStop();
+  document.getElementById('screen-main').classList.remove('active');
+  document.getElementById('screen-summary').classList.add('active');
+  buildSummary();
+  window.scrollTo(0,0);
+}
+function backToStory(){
+  document.getElementById('screen-summary').classList.remove('active');
+  document.getElementById('screen-main').classList.add('active');
+  renderChapter();renderNav();
+  window.scrollTo(0,0);
+}
+function buildSummary(){
+  const now=new Date();
+  document.getElementById('summary-date').textContent=now.toLocaleDateString('en-AU',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  let html=renderSessionStatsHTML().replace('session-stats','session-stats summary-block');
+  const allTapped=[...new Set(state.chapters.flatMap(s=>s.wordsTapped).map(w=>w.toLowerCase()))];
+  const allVocab=[...new Set(state.chapters.flatMap(s=>s.vocab))];
+  if(allTapped.length){
+    html+=`<div class="summary-block"><div class="summary-block-title">All words tapped (${allTapped.length} unique)</div><div style="font-family:'DM Mono',monospace;font-size:0.78rem;color:var(--ink-mid);line-height:2;">${allTapped.join(' · ')}</div></div>`;
+  }
+  if(allVocab.length){
+    html+=`<div class="summary-block"><div class="summary-block-title">Vocab list (saved words)</div><div class="vocab-list">${allVocab.map(w=>`<div class="vocab-chip">${w}</div>`).join('')}</div></div>`;
+  }
+  CHAPTERS.forEach((ch,idx)=>{
+    const s=state.chapters[idx];
+    if(!s.complete&&Object.keys(s.answers).length===0)return;
+    const rows=ch.questions.map((q,qi)=>{
+      const a=s.answers[qi]||{};
+      if(a.mc===undefined)return'';
+      const ansText=a.mc==='other'?(a.otherText||''):q.options[a.mc];
+      const label=a.mc==='other'?'Own idea':'Selected';
+      return`<div class="summary-response"><div class="summary-response-q">Q${qi+1}: ${q.text}</div><div class="summary-response-a"><em>${label}:</em> ${ansText}</div></div>`;
+    }).join('');
+    if(rows.replace(/\s/g,'')||s.matchDone){
+      const matchStatus=s.matchDone?'Completed — all words matched correctly.':'Not yet fully completed.';
+      html+=`<div class="summary-block"><div class="summary-block-title">Chapter ${ch.num}: ${ch.title}</div>${rows}<div class="summary-response"><div class="summary-response-q">Vocabulary matching</div><div class="summary-response-a">${matchStatus}</div></div></div>`;
+    }
+  });
+  document.getElementById('summary-content').innerHTML=html;
+}
+
+// ── INIT ───────────────────────────────────────────────────────────
+function hasReadingProgress(){
+  return state.chapters.some(c=>
+    c.complete ||
+    Object.keys(c.answers||{}).length>0 ||
+    (c.vocab&&c.vocab.length>0) ||
+    (c.wordsTapped&&c.wordsTapped.length>0) ||
+    c.matchDone
+  );
+}
+function getFurthestChapter(){
+  let target=Number.isInteger(state.currentChapter)?state.currentChapter:0;
+  state.chapters.forEach((c,i)=>{
+    const active=c.complete||Object.keys(c.answers||{}).length>0||(c.vocab&&c.vocab.length>0)||(c.wordsTapped&&c.wordsTapped.length>0)||c.matchDone;
+    if(active)target=Math.max(target,i);
+  });
+  return Math.min(Math.max(target,0),CHAPTERS.length-1);
+}
+
+function showMain(){
+  enforceChapterLocks();
+  state.currentChapter=getFurthestChapter();
+  saveState();
+  document.getElementById('screen-cover').classList.remove('active');
+  document.getElementById('screen-main').classList.add('active');
+  document.getElementById('screen-summary').classList.remove('active');
+  document.body.classList.remove('cover-active');
+  renderNav();renderChapter();
+  window.scrollTo(0,0);
+}
+
+// Returning users with saved activity skip the cover and resume at the furthest visited/active chapter.
+// First-time users see the cover page; all 10 chapters are available once they begin.
+if(hasReadingProgress()){
+  showMain();
+} else {
+  document.getElementById('screen-cover').classList.add('active');
+  document.getElementById('screen-main').classList.remove('active');
+  document.getElementById('screen-summary').classList.remove('active');
+  document.body.classList.add('cover-active');
+}
+
+document.addEventListener('click',e=>{
+  const popup=document.getElementById('word-popup');
+  if(popup.classList.contains('show')&&!popup.contains(e.target)&&!e.target.classList.contains('word-tap')&&!e.target.classList.contains('word-any'))closePopup();
+});
+</script>
+</body>
+</html>
